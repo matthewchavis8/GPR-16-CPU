@@ -1,0 +1,21 @@
+CHIP PC {
+    IN in[16], reset, load, inc;
+    OUT out[16];
+    
+    PARTS:
+    // Compute out + 1
+    Inc16(in = regOut, out = incOut);
+    // Multiplex between regOut (hold), incOut (inc), and in (load)
+    Mux16(a = regOut, b = incOut, sel = inc, out = incOrHold);   // Choose inc vs hold
+    Mux16(a = incOrHold, b = in, sel = load, out = loadOrInc);   // Choose load vs inc/hold
+
+    // Handle reset → choose between 0 or loadOrInc
+    Mux16(a = loadOrInc, b[0..15] = false, sel = reset, out = nextVal);  // b = 0
+
+    // Register to hold current PC value
+    Register(in = nextVal, load = true, out = regOut);
+
+    // Output current PC value
+    Or(a = false, b = reset, out = loadAlways);  // just to keep load signal active
+    Mux16(a = regOut, b = regOut, sel = false, out = out);  // pass through
+}
