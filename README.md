@@ -1,7 +1,6 @@
-````markdown
 # GPR-16 CPU
 
-A custom 16-bit CPU built from first principles using the **Nand2Tetris** hardware description language (HDL).  
+A custom 16-bit CPU built from first principles using the hardware description language (HDL).  
 This project implements a fully functional computer architecture with general-purpose registers, memory, screen, and keyboard I/O — all running in the Nand2Tetris Hardware Simulator.
 
 ## Architecture Overview
