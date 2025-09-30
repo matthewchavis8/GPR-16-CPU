@@ -7,8 +7,6 @@
 class Parser {
   public:
     Parser(std::ifstream& file, std::string_view file_name);
-    // Parser should be a singlethon 
-    // Parser needs to disable move and copy constructors
     
     bool hasMoreCommands();
 
