@@ -11,7 +11,7 @@ if(NOT DEFINED CMAKE_CXX_STANDARD)
 endif()
 
 
-// Adding submodules to link
+# Adding submodules to link
 add_subdirectory(Modules/Parser)
 add_subdirectory(Modules/Code)
 add_subdirectory(Modules/MainDriver)
@@ -23,7 +23,7 @@ add_executable(
   assembler.cpp
 )
 
-// Linking static libs to executable
+# Linking static libs to executable
 target_link_libraries(Assembler PRIVATE
   Parser
   Code

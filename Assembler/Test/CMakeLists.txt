@@ -5,10 +5,10 @@ add_executable(unit_Parser
   symbolTable.cpp
 )
 
-target_link_libraries(unit_parser
+target_link_libraries(unit_Parser
   PRIVATE
   GTest::gtest_main
 )
 
 include(GoogleTest)
-gtest_discover_tests(unit_parser)
+gtest_discover_tests(unit_Parser)
