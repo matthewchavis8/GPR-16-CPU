@@ -5,8 +5,15 @@
 #include "../Utils/commandType.cpp"
 
 class Parser {
+  private:
+    std::ifstream& m_file;
+    std::string_view m_file_name;
+    std::string_view m_command;
+    uint32_t m_position;
+
   public:
     Parser(std::ifstream& file, std::string_view file_name);
+    Parser& operator=(Parser const&) = delete;
     
     bool hasMoreCommands();
 
