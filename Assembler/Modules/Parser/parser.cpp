@@ -27,7 +27,9 @@ Parser::Parser(std::ifstream& file, const std::string_view file_name)
       std::runtime_error("[ERROR] unable to open file\n");
 
     m_file >> m_command;          // Load Current Comamand
-    m_file >> *m_lookahead_buffer; // Load Next Command
+    std::string lookahead;
+    if (m_file >> lookahead)
+      m_lookahead_buffer  = std::move(lookahead); // Load Next Command
 }
 
 bool Parser::hasMoreCommands() {
