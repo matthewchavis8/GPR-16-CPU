@@ -1,3 +1,5 @@
+#pragma once
+
 enum CommandType {
   A_COMMAND,
   C_COMMAND,

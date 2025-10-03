@@ -10,6 +10,9 @@ if(NOT DEFINED CMAKE_CXX_STANDARD)
 	set(CMAKE_CXX_STANDARD 17)
 endif()
 
+# Export ClangD
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 # Adding submodules to link
 add_subdirectory(Modules/Parser)

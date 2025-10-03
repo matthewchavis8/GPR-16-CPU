@@ -1,28 +1,30 @@
 #include <iosfwd>
 #include <iostream>
 #include <fstream>
-#include <utility>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include "parser.h"
 
-Parser::Parser(std::ifstream& file, std::string_view file_name) 
+Parser::Parser(std::ifstream& file, const std::string_view file_name) 
   : m_file { file } 
   , m_file_name { file_name }
 { 
     if (m_file_name.length() < 1)
-      std::cerr << "[Error] file_name was not passed" << '\n';
+      std::invalid_argument("[ERROR] File does not exit\n");
 
     int n = m_file_name.length();
     
     // Check if file is assembly or not    
-    if (m_file_name[n - 3] == 'a' && m_file_name[n - 2] == 's' && m_file_name[n - 3] == 'm')
-      std::cerr << "[Error] File is not an assembly" << '\n';
+    if (m_file_name[n - 3] == 'a' && m_file_name[n - 2] == 's' && m_file_name[n - 1] == 'm')
+      std::invalid_argument("[Error] File is not an assembly\n");
     
     // Check if file is open or not if not open it
     if (!m_file.is_open())
       m_file.open(m_file_name);
   
     if (!m_file)
-      std::cerr << "[ERROR] unable to open file" << '\n';
+      std::runtime_error("[ERROR] unable to open file\n");
 
     m_file >> m_command;          // Load Current Comamand
     m_file >> *m_lookahead_buffer; // Load Next Command
@@ -30,13 +32,9 @@ Parser::Parser(std::ifstream& file, std::string_view file_name)
 
 bool Parser::hasMoreCommands() {
   if (!m_file.is_open())
-    std::cerr << "[ERROR] File is not open" << '\n';
+    std::runtime_error("[ERROR] File is not open\n");
   
-  // Check look ahead buffer if it has a value
-  if (m_lookahead_buffer.has_value())
-    return true;
-  
-  return false;
+  return m_lookahead_buffer.has_value();
 }
 
 void Parser::advance() {
@@ -44,7 +42,7 @@ void Parser::advance() {
     return;
 
   if (!m_file.is_open())
-    std::cerr << "[ERROR] File is not open" << '\n';
+    std::runtime_error("[ERROR] File is not open\n");
   
   // Move the buffer into the current command 
   m_command = std::move(*m_lookahead_buffer);
@@ -56,3 +54,6 @@ void Parser::advance() {
   else 
     m_lookahead_buffer.reset();
 }
+
+const std::string& Parser::getCommand() { return m_command; }
+const std::string& Parser::getLookAheadBuffer() { return *m_lookahead_buffer; }

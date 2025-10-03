@@ -8,6 +8,7 @@ add_executable(unit_Parser
 target_link_libraries(unit_Parser
   PRIVATE
   GTest::gtest_main
+  Parser
 )
 
 include(GoogleTest)

@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include "../Utils/commandType.cpp"
+#include "../Utils/commandType.h"
 
 class Parser {
   private:
@@ -32,4 +32,7 @@ class Parser {
     std::string_view comp();
 
     std::string_view jump();
+
+    const std::string& getCommand();
+    const std::string& getLookAheadBuffer();
 };
