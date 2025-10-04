@@ -13,7 +13,6 @@ endif()
 # Export ClangD
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
 # Adding submodules to link
 add_subdirectory(Modules/Parser)
 add_subdirectory(Modules/Code)
