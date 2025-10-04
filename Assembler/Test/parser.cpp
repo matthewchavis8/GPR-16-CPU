@@ -99,3 +99,26 @@ TEST_F(ParserTestObject, canAdvanceToNextLine) {
   ASSERT_EQ(expected_command1, command_1);
   ASSERT_EQ(expected_buffer1, buffer_1);
 }
+
+TEST_F(ParserTestObject, canHandleNoMoreCommands) {
+  ASSERT_TRUE(parser);
+  ASSERT_TRUE(parser->hasMoreCommands());
+
+  parser->advance();
+  parser->advance();
+  parser->advance();
+  parser->advance();
+  parser->advance();
+  parser->advance();
+  parser->advance();
+  parser->advance();
+  
+  std::string_view expected_command1 { "White" };
+  std::string_view command_1 { parser->getCommand() };
+
+  std::string_view expected_buffer1 { "" };
+  std::string_view buffer_1 { parser->getLookAheadBuffer() };
+
+  ASSERT_EQ(expected_command1, command_1);
+  ASSERT_EQ(expected_buffer1, buffer_1);
+}
