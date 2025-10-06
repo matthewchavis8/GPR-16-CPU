@@ -79,7 +79,7 @@ std::string Parser::symbol() const {
   return "";
 }
 std::string Parser::dest() const {
-  CommandType cmd_type = this->commandType();
+  CommandType cmd_type = commandType();
 
   // Safety check should only be called on C_COMMAND
   if (cmd_type != CommandType::C_COMMAND)
