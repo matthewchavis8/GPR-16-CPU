@@ -11,20 +11,20 @@ Parser::Parser(std::ifstream& file, const std::string_view file_name)
   , m_file_name { file_name }
 { 
     if (m_file_name.length() < 1)
-      std::invalid_argument("[ERROR] File does not exit\n");
+      throw std::invalid_argument("[ERROR] File does not exit\n");
 
-    int n = m_file_name.length();
+    int size = m_file_name.length();
     
     // Check if file is assembly or not    
-    if (m_file_name[n - 3] == 'a' && m_file_name[n - 2] == 's' && m_file_name[n - 1] == 'm')
-      std::invalid_argument("[Error] File is not an assembly\n");
+    if (m_file_name.substr(size - 3) != "asm")
+      throw std::invalid_argument("[Error] File is not an assembly\n");
     
     // Check if file is open or not if not open it
     if (!m_file.is_open())
       m_file.open(m_file_name);
   
     if (!m_file)
-      std::runtime_error("[ERROR] unable to open file\n");
+      throw std::runtime_error("[ERROR] unable to open file\n");
 
     m_file >> m_command;          // Load Current Comamand
     std::string lookahead;
@@ -34,7 +34,7 @@ Parser::Parser(std::ifstream& file, const std::string_view file_name)
 
 bool Parser::hasMoreCommands() {
   if (!m_file.is_open())
-    std::runtime_error("[ERROR] File is not open\n");
+    throw std::runtime_error("[ERROR] File is not open\n");
   
   return m_lookahead_buffer.has_value();
 }
@@ -44,7 +44,7 @@ void Parser::advance() {
     return;
 
   if (!m_file.is_open())
-    std::runtime_error("[ERROR] File is not open\n");
+    throw std::runtime_error("[ERROR] File is not open\n");
   
   // Move the buffer into the current command 
   m_command = std::move(*m_lookahead_buffer);
@@ -57,5 +57,68 @@ void Parser::advance() {
     m_lookahead_buffer.reset();
 }
 
-const std::string& Parser::getCommand() { return m_command; }
-const std::string& Parser::getLookAheadBuffer() { return *m_lookahead_buffer; }
+CommandType Parser::commandType() const {
+  if (m_command.empty())
+    throw std::runtime_error("[ERROR] Empty command encountered\n");
+
+  if (m_command[0] == '@')
+    return CommandType::A_COMMAND;
+  if (m_command.front() == '(' && m_command.back() == ')')
+    return CommandType::L_COMMAND;
+
+  return CommandType::C_COMMAND;
+}
+
+std::string Parser::symbol() const {
+  CommandType cmd_type = this->commandType();
+
+  if (cmd_type == CommandType::A_COMMAND)
+    return m_command.substr(1);
+  if (cmd_type == CommandType::L_COMMAND)
+    return m_command.substr(1, m_command.size() - 2);
+  return "";
+}
+std::string Parser::dest() const {
+  CommandType cmd_type = this->commandType();
+
+  // Safety check should only be called on C_COMMAND
+  if (cmd_type != CommandType::C_COMMAND)
+    throw std::runtime_error("[ERROR] cmd_type is not a C_COMMAND\n");
+
+  std::size_t eq_sign { m_command.find("=") };
+  if (eq_sign != std::string::npos)
+    return m_command.substr(0, eq_sign);
+
+  return "";
+}
+std::string Parser::comp() const {
+  CommandType cmd_type = this->commandType();
+
+  // Safety check should only be called on C_COMMAND
+  if (cmd_type != CommandType::C_COMMAND)
+    throw std::runtime_error("[ERROR] cmd_type is not a C_COMMAND\n");
+
+  std::size_t eq_sign { m_command.find("=") };
+  std::size_t semi_sign { m_command.find(";") };
+
+  size_t comp_start = (eq_sign != std::string::npos) ? eq_sign + 1 : 0;
+  size_t comp_end = (semi_sign != std::string::npos) ? semi_sign : m_command.size();
+
+  return m_command.substr(comp_start, comp_end - comp_start);
+}
+std::string Parser::jump() const {
+  CommandType cmd_type = this->commandType();
+
+  // Safety check should only be called on C_COMMAND
+  if (cmd_type != CommandType::C_COMMAND)
+    throw std::runtime_error("[ERROR] cmd_type is not a C_COMMAND\n");
+  
+  size_t semi_pos = m_command.find(';');
+  if (semi_pos != std::string::npos)
+    return m_command.substr(semi_pos + 1);
+
+  return "";
+}
+
+const std::string& Parser::getCommand() const { return m_command; }
+const std::string& Parser::getLookAheadBuffer() const { return *m_lookahead_buffer; }

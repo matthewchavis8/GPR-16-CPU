@@ -13,7 +13,6 @@ class Parser {
     std::string_view m_file_name;
     std::string m_command;
     std::optional<std::string> m_lookahead_buffer;
-    std::streampos m_position;
 
   public:
     Parser(std::ifstream& file, const std::string_view file_name);
@@ -23,16 +22,16 @@ class Parser {
 
     void advance();
 
-    CommandType commandType();
+    CommandType commandType() const;
     
-    std::string_view symbol();
+    std::string symbol() const;
 
-    std::string_view dest();
+    std::string dest() const;
 
-    std::string_view comp();
+    std::string comp() const;
 
-    std::string_view jump();
+    std::string jump() const;
 
-    const std::string& getCommand();
-    const std::string& getLookAheadBuffer();
+    const std::string& getCommand() const;
+    const std::string& getLookAheadBuffer() const;
 };

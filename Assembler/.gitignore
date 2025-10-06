@@ -1,4 +1,4 @@
 /build
 /.cache
-/buildRelease
-/buildDebug
+/Release
+/Debug

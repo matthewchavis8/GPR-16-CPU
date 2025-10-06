@@ -4,7 +4,7 @@
         {
             "name": "Debug",
             "displayName": "Debug",
-            "binaryDir": "${sourceDir}/buildDebug",
+            "binaryDir": "${sourceDir}/Debug",
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
@@ -16,7 +16,7 @@
         {
             "name": "Release",
             "displayName": "Release",
-            "binaryDir": "${sourceDir}/buildRelease",
+            "binaryDir": "${sourceDir}/Release",
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
