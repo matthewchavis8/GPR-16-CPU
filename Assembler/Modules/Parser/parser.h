@@ -17,16 +17,16 @@
  */
 class Parser {
   private:
-    /** @brief Reference to the input file stream containing assembly code. */
+    // @brief Reference to the input file stream containing assembly code.
     std::ifstream& m_file;
     
-    /** @brief Name of the source assembly file. */
+    // @brief Name of the source assembly file.
     std::string_view m_file_name;
     
-    /** @brief The current assembly command being processed. */
+    // @brief The current assembly command being processed.
     std::string m_command;
     
-    /** @brief Lookahead buffer holding the next command, if available. */
+    // @brief Lookahead buffer holding the next command, if available.
     std::optional<std::string> m_lookahead_buffer;
 
   public:
