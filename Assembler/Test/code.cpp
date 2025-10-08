@@ -104,7 +104,6 @@ TEST_F(CodeTestObject, canReadJmpBits) {
     parser->advance();
 
   std::string mnemo { parser->jump() };
-  //
   std::uint8_t expectedJmpBits { 0b111 };
   std::uint8_t jmpBits { code->jump(mnemo) };
 
