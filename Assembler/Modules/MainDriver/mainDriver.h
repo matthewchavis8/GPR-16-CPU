@@ -9,14 +9,16 @@
 
 class MainDriver {
   private:
-    Parser      m_parser;
-    Code        m_code;
-    SymbolTable m_symbolTable;
+    Parser        m_parser;
+    Code          m_code;
+    SymbolTable   m_symbolTable;
+    std::string   m_file_name;
+    std::ofstream m_outputFile;
     
     void firstPass();
     void secondPass();
   public:
-    MainDriver(std::ifstream& file, std::string_view file_name);
+    MainDriver(std::ifstream& file, const std::string& file_name);
     MainDriver& operator=(const MainDriver&) = delete;
 
     void run();

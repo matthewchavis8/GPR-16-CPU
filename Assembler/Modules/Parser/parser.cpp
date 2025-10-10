@@ -119,3 +119,31 @@ std::string Parser::jump() const {
 
 const std::string& Parser::getCommand() const { return m_command; }
 const std::string& Parser::getLookAheadBuffer() const { return *m_lookahead_buffer; }
+
+void Parser::reset() {
+  m_file.clear();
+  m_file.seekg(0, std::ios::beg);
+  m_command.clear();
+
+  if (m_file_name.length() < 1)
+    throw std::invalid_argument("[ERROR] File does not exit\n");
+
+  int size = m_file_name.length();
+  
+  // Validate .asm file
+  if (m_file_name.substr(size - 3) != "asm")
+    throw std::invalid_argument("[Error] File is not an assembly\n");
+  
+  if (!m_file.is_open())
+    m_file.open(m_file_name);
+
+  if (!m_file)
+    throw std::runtime_error("[ERROR] unable to open file\n");
+
+  // Initialize with first command and lookahead buffer
+  m_file >> m_command;
+  std::string lookahead;
+  if (m_file >> lookahead)
+    m_lookahead_buffer = std::move(lookahead);
+
+}

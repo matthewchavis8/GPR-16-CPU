@@ -135,4 +135,6 @@ class Parser {
      * @pre m_lookahead_buffer must contain a value.
      */
     const std::string& getLookAheadBuffer() const;
+
+    void reset();
 };
