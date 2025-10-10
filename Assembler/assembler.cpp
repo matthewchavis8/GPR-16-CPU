@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
 
   std::ifstream file { argv[1] };
-  std::string_view file_name { argv[1] };
+  std::string file_name { argv[1] };
 
   auto parser = std::make_unique<Parser>(file, file_name);
   auto code = std::make_unique<Code>();

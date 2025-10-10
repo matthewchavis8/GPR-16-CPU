@@ -47,5 +47,5 @@ if(BUILD_TESTING)
   )
   FetchContent_MakeAvailable(googletest)
 
-  add_subdirectory(test)
+  add_subdirectory(Test)
 endif()

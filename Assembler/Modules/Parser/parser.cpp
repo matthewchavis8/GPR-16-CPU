@@ -3,10 +3,9 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include "parser.h"
 
-Parser::Parser(std::ifstream& file, const std::string_view file_name) 
+Parser::Parser(std::ifstream& file, const std::string& file_name) 
   : m_file { file } 
   , m_file_name { file_name }
 { 

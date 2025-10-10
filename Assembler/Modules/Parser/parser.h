@@ -21,7 +21,7 @@ class Parser {
     std::ifstream& m_file;
     
     // @brief Name of the source assembly file.
-    std::string_view m_file_name;
+    std::string m_file_name;
     
     // @brief The current assembly command being processed.
     std::string m_command;
@@ -41,7 +41,7 @@ class Parser {
      * @throw std::invalid_argument If file_name is empty or does not end in `.asm`.
      * @throw std::runtime_error If the file cannot be opened or read.
      */
-    Parser(std::ifstream& file, const std::string_view file_name);
+    Parser(std::ifstream& file, const std::string& file_name);
     
     /**
      * @brief Deleted copy assignment operator.
