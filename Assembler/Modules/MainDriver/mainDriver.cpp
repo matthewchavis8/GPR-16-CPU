@@ -5,7 +5,6 @@
 #include <fstream>
 #include <stdexcept>
 #include <bitset>
-#include <iostream>
 
 MainDriver::MainDriver(std::ifstream& file, const std::string& file_name)
  : m_parser { file, file_name }
@@ -21,7 +20,6 @@ void MainDriver::firstPass() {
     switch (m_parser.commandType()) {
 
       case CommandType::L_COMMAND: {
-        std::cout << "[LOG] L_command detected\n";
         std::string symbol = m_parser.symbol();
 
         if (!m_symbolTable.contains(symbol))
@@ -33,7 +31,6 @@ void MainDriver::firstPass() {
       case CommandType::A_COMMAND:
 
       case CommandType::C_COMMAND:
-        std::cout << "[LOG] C_command detected\n";
         ++romAddress;
         break;
 
@@ -59,7 +56,6 @@ void MainDriver::secondPass() {
 
     switch (m_parser.commandType()) {
       case CommandType::A_COMMAND: {
-        std::cout << "[LOG] A_command Second pass detected\n";
         std::string symbol { m_parser.symbol()};
         int address {};
 
@@ -75,7 +71,6 @@ void MainDriver::secondPass() {
       }
 
       case CommandType::C_COMMAND: {
-        std::cout << "[LOG] C_command Second pass detected\n";
         uint8_t compBits { m_code.comp(m_parser.comp()) };
         uint8_t destBits { m_code.dest(m_parser.dest()) };
         uint8_t jumpBits { m_code.jump(m_parser.jump()) };
@@ -97,7 +92,5 @@ void MainDriver::secondPass() {
 
 void MainDriver::run() {
   firstPass();
-  std::cout << "[LOG] First pass was able to run\n";
   secondPass();
-  std::cout << "[LOG] Second pass was able to run\n";
 }

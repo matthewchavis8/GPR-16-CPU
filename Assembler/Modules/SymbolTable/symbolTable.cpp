@@ -3,8 +3,8 @@
 #include <optional>
 #include <string_view>
 
-void SymbolTable::addEntry(std::string_view symbol, uint16_t address) { 
-  m_hashTable.try_emplace(std::string(symbol), address); 
+void SymbolTable::addEntry(std::string_view symbol, uint16_t address) {
+  m_hashTable.try_emplace(std::string(symbol), address);
 }
 
 bool SymbolTable::contains(std::string_view symbol) const {

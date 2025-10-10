@@ -4,6 +4,9 @@
 #include <memory>
 #include <string>
 
+/**
+ * @brief Verifies that a symbol can be added and subsequently found in the table.
+ */
 TEST(SymbolTableHarness, canAddEntry) {
   auto symbolTable = std::make_unique<SymbolTable>();
 
@@ -16,6 +19,9 @@ TEST(SymbolTableHarness, canAddEntry) {
   ASSERT_TRUE(symbolTable->contains("="));
 }
 
+/**
+ * @brief Verifies that contains() correctly returns false for unregistered symbols.
+ */
 TEST(SymbolTableHarness, canContain) {
   auto symbolTable = std::make_unique<SymbolTable>();
 
@@ -28,6 +34,9 @@ TEST(SymbolTableHarness, canContain) {
   ASSERT_FALSE(symbolTable->contains(":)"));
 }
 
+/**
+ * @brief Verifies that getAddress() retrieves the correct address for a registered symbol.
+ */
 TEST(SymbolTableHarness, canGetAddress) {
   auto symbolTable = std::make_unique<SymbolTable>();
 

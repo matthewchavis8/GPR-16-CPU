@@ -12,17 +12,17 @@ using namespace testing;
  * @class ParserTestObject
  * @brief Test fixture for Parser class unit tests.
  *
- * Creates a temporary assembly file with representative commands and 
+ * Creates a temporary assembly file with representative commands and
  * initializes a Parser instance for testing command parsing operations.
  */
 class CodeTestObject : public ::testing::Test {
   protected:
     // @brief Path to the temporary assembly file used for testing
     std::filesystem::path filepath;
-    
+
     // @brief Input file stream for reading the test assembly file.
     std::ifstream filestream;
-    
+
     // @brief Parser instance under test.
     std::unique_ptr<Parser> parser;
     // @brief Code instance under test.
@@ -38,7 +38,7 @@ class CodeTestObject : public ::testing::Test {
     void SetUp() override {
     // Setting up temporary directory
     filepath = std::filesystem::temp_directory_path() / "tmp.asm";
-    
+
    // Setting up file path with text
    {
     std::ofstream file(filepath);
@@ -70,7 +70,7 @@ class CodeTestObject : public ::testing::Test {
 };
 
 TEST_F(CodeTestObject, canReadDestBits) {
-  ASSERT_TRUE(parser);  
+  ASSERT_TRUE(parser);
 
   while (parser->commandType() != CommandType::C_COMMAND)
     parser->advance();
@@ -84,7 +84,7 @@ TEST_F(CodeTestObject, canReadDestBits) {
 }
 
 TEST_F(CodeTestObject, canReadCompBits) {
-  ASSERT_TRUE(parser);  
+  ASSERT_TRUE(parser);
 
   while (parser->commandType() != CommandType::C_COMMAND)
     parser->advance();
@@ -98,7 +98,7 @@ TEST_F(CodeTestObject, canReadCompBits) {
 }
 
 TEST_F(CodeTestObject, canReadJmpBits) {
-  ASSERT_TRUE(parser);  
+  ASSERT_TRUE(parser);
 
   while (parser->hasMoreCommands())
     parser->advance();
