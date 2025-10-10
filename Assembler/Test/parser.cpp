@@ -11,17 +11,17 @@ using namespace testing;
  * @class ParserTestObject
  * @brief Test fixture for Parser class unit tests.
  *
- * Creates a temporary assembly file with representative commands and 
+ * Creates a temporary assembly file with representative commands and
  * initializes a Parser instance for testing command parsing operations.
  */
 class ParserTestObject : public ::testing::Test {
   protected:
     // @brief Path to the temporary assembly file used for testing
     std::filesystem::path filepath;
-    
+
     // @brief Input file stream for reading the test assembly file.
     std::ifstream filestream;
-    
+
     // @brief Parser instance under test.
     std::unique_ptr<Parser> parser;
 
@@ -35,7 +35,7 @@ class ParserTestObject : public ::testing::Test {
     void SetUp() override {
     // Setting up temporary directory
     filepath = std::filesystem::temp_directory_path() / "tmp.asm";
-    
+
    // Setting up file path with text
    {
     std::ofstream file(filepath);
@@ -113,7 +113,7 @@ TEST_F(ParserTestObject, canAdvance) {
   ASSERT_EQ(expected_buffer, buffer_1);
 
   parser->advance();
-  
+
   std::string_view expected_next_command { "D=D+A" };
   std::string_view command_2 { parser->getCommand() };
 
@@ -140,7 +140,7 @@ TEST_F(ParserTestObject, canHandleNoMoreCommands) {
   parser->advance();
   parser->advance();
   parser->advance();
-  
+
   std::string_view expected_command1 { "0;JMP" };
   std::string_view command_1 { parser->getCommand() };
 

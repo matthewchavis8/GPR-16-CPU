@@ -9,7 +9,7 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-                "CMAKE_CXX_FLAGS_INIT": 
+                "CMAKE_CXX_FLAGS_INIT":
                   "-Wall -Wextra -Wunused -Werror -fsanitize=address -fsanitize=undefined -g"
             }
         },
@@ -20,7 +20,8 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_CXX_FLAGS_INIT": "-O3 -Wall"
+                "CMAKE_CXX_FLAGS_INIT": "-O3 -Wall",
+                "BUILD_TESTING": "OFF"
             }
         }
     ]
