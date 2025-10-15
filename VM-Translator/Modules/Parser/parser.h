@@ -1,23 +1,26 @@
 #pragma once
 
 #include <fstream>
+#include <optional>
 #include "../Utils/CommandType.h"
 
 class Parser {
   private:
-    std::ifstream m_file;
+    std::ifstream& m_file;
+    std::string m_cmd;
+    std::optional<std::string> m_lookaheadBuffer;
 
   public:
-    Parser() = default;
+    Parser(std::ifstream& file);
     Parser(const Parser&) = delete;
 
     bool hasMoreLines();
 
     void advance();
 
-    CommandType commandType();
+    CommandType commandType() const;
     
-    std::string arg1(const std::string& cmd) const;
+    std::string arg1() const;
 
-    int arg2(int) const;
+    int arg2() const;
 };
