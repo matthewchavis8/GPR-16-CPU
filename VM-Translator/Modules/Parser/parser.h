@@ -1,14 +1,15 @@
 #pragma once
 
 #include <fstream>
-#include <optional>
 #include "../Utils/CommandType.h"
 
 class Parser {
   private:
     std::ifstream& m_file;
+    std::string m_currentLine;
     std::string m_cmd;
-    std::optional<std::string> m_lookaheadBuffer;
+    std::string m_arg1;
+    std::string m_arg2;
 
   public:
     Parser(std::ifstream& file);

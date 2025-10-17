@@ -1,6 +1,8 @@
 #include "parser.h"
 #include <fstream>
 #include <stdexcept>
+#include <sstream>
+#include <string>
 #include "../Utils/CommandType.h"
 
 Parser::Parser(std::ifstream& file)
@@ -8,25 +10,23 @@ Parser::Parser(std::ifstream& file)
 {
   if (!m_file)
     throw std::runtime_error("[ERROR] File is not open\n");
-  
-  std::string lookAhead;
-  
-  m_file >> m_cmd;
-  if (m_file >> lookAhead)
-    m_lookaheadBuffer = std::move(lookAhead);
 }
 
-bool Parser::hasMoreLines() { return m_lookaheadBuffer.has_value(); }
+bool Parser::hasMoreLines() {
+  while (std::getline(m_file, m_currentLine)) {
+    if (!m_currentLine.empty())
+      return true;
+  }
+  return false;
+}
 
-void Parser::advance() { 
-  if (!hasMoreLines())
-    return;
+void Parser::advance() {
+  std::istringstream iss(m_currentLine);
 
-  m_cmd = std::move(*m_lookaheadBuffer);
+  m_arg1.clear();
+  m_arg2.clear();
 
-  std::string lookAhead;
-  if (m_file >> lookAhead)
-    m_lookaheadBuffer = std::move(lookAhead);
+  iss >> m_cmd >> m_arg1 >> m_arg2;
 }
 
 CommandType Parser::commandType() const {
@@ -52,15 +52,22 @@ CommandType Parser::commandType() const {
 }
 
 std::string Parser::arg1() const {
-  if (CommandType::C_RETURN == commandType())
+  CommandType cmd_type { commandType() };
+  if (CommandType::C_RETURN == cmd_type)
     throw std::runtime_error("[ERROR] Should not be called on C_RETURN\n");
+  if (CommandType::C_ARITHMETIC == cmd_type)
+    return m_cmd;
 
-  return m_cmd;
+  return m_arg1;
 }
 
 int Parser::arg2() const {
-  if (commandType() != CommandType::C_PUSH || CommandType::C_POP || CommandType::C_FUNCTION || CommandType::C_CALL)
+  CommandType cmd_type { commandType() };
+  if (cmd_type != CommandType::C_PUSH      &&
+      cmd_type != CommandType::C_POP       &&
+      cmd_type != CommandType::C_FUNCTION  &&
+      cmd_type != CommandType::C_CALL)
     throw std::runtime_error("[ERROR] Should not be called on C_PUSH, C_POP, C_FUNCTION, C_CALL");
 
-  return stoi(m_cmd);
+  return stoi(m_arg2);
 }
