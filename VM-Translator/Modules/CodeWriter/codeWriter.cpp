@@ -2,18 +2,18 @@
 #include "codeWriter.h"
 #include <stdexcept>
 
-CodeWriter::CodeWriter(std::ifstream& file): m_file ( file ) {
-  if (!m_file)
-    throw std::runtime_error("[ERROR] Failed to open filestream\n");
+CodeWriter::CodeWriter(const std::string& fileName) {
+  setFileName(fileName);
 }
 
-void CodeWriter::setFileName(const std::string& filename) {
-  std::size_t n = filename.length();
 
-  if (filename.substr(n - 3) != ".vm")
+void CodeWriter::setFileName(const std::string& fileName) {
+  std::size_t n = fileName.length();
+
+  if (fileName.substr(n - 4) != ".asm")
     std::runtime_error("[ERROR] Invalid filename format must have .vm in the end\n");
 
-  m_file_name = std::move(filename);
+  m_file_name = std::move(fileName);
 
   m_output_file.open(m_file_name);
 }
