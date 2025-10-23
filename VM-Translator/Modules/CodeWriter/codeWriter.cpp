@@ -196,7 +196,7 @@ void CodeWriter::writePushPop(CommandType cmdType, const std::string& segment, i
         }
     }
     else {
-        throw std::runtime_error("writePushPop called with non push/pop CommandType");
+        throw std::logic_error("writePushPop called with non push/pop CommandType");
     }
 }
 

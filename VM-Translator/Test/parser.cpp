@@ -1,9 +1,12 @@
+/**
+ * @file parser.cpp
+ * @brief Unit tests for the Parser interface and VM command parsing.
+ */
 #include "gtest/gtest.h"
 #include <filesystem>
 #include <fstream>
 #include <memory>
 #include <stdexcept>
-#include <system_error>
 #include "../Modules/Parser/parser.h"
 
 using namespace testing;
@@ -12,27 +15,25 @@ using namespace testing;
  * @class ParserTestObject
  * @brief Test fixture for Parser class unit tests.
  *
- * Creates a temporary assembly file with representative commands and
- * initializes a Parser instance for testing command parsing operations.
+ * Creates a temporary VM file with representative commands and
+ * initializes a Parser instance for testing VM command parsing operations.
  */
 class ParserTestObject : public ::testing::Test {
   protected:
-    // @brief Path to the temporary assembly file used for testing
+    /** @brief Path to the temporary VM file used for testing. */
     std::filesystem::path filepath;
 
-    // @brief Input file stream for reading the test assembly file.
+    /** @brief Input file stream for reading the test VM file. */
     std::ifstream filestream;
 
+    /** @brief Parser instance under test. */
     std::unique_ptr<Parser> parser;
-  
-
-    // @brief Parser instance under test.
 
     /**
      * @brief Initializes test environment before each test case.
      *
-     * Creates a temporary `.asm` file with a sample assembly program containing
-     * A-commands, C-commands, and label declarations. Opens the file stream and
+     * Creates a temporary `.vm` file with sample VM commands including
+     * push, pop, arithmetic, and branching operations. Opens the file stream and
      * constructs the Parser instance.
      */
     void SetUp() override {
@@ -58,7 +59,7 @@ class ParserTestObject : public ::testing::Test {
     /**
      * @brief Cleans up test environment after each test case.
      *
-     * Closes the file stream and removes the temporary assembly file.
+     * Closes the file stream and removes the temporary VM file.
      */
     void TearDown() override {
       filestream.close();
@@ -66,11 +67,19 @@ class ParserTestObject : public ::testing::Test {
     }
 };
 
-
+/**
+ * @brief Verifies that the Parser can be successfully constructed.
+ */
 TEST_F(ParserTestObject, canInitializeParser) {
     ASSERT_TRUE(parser);
 }
 
+/**
+ * @brief Tests advancing through all commands and verifying command types.
+ *
+ * Validates that the parser correctly identifies all six command types
+ * (push, arithmetic, pop, label, goto) in sequence.
+ */
 TEST_F(ParserTestObject, canAdvanceThroughFile) {
     std::vector<std::string> expectedCommands = {
         "push", "push", "add", "pop", "label", "goto"
@@ -95,6 +104,12 @@ TEST_F(ParserTestObject, canAdvanceThroughFile) {
     ASSERT_EQ(idx, expectedCommands.size());
 }
 
+/**
+ * @brief Tests that commandType() returns the correct type for each command.
+ *
+ * Steps through each command in the test file and validates the returned
+ * CommandType matches the expected type.
+ */
 TEST_F(ParserTestObject, canReturnCorrectCommandType) {
     ASSERT_TRUE(parser->hasMoreLines());
     parser->advance();
@@ -116,6 +131,12 @@ TEST_F(ParserTestObject, canReturnCorrectCommandType) {
     EXPECT_EQ(parser->commandType(), CommandType::C_GOTO);
 }
 
+/**
+ * @brief Tests parsing the entire VM file and extracting all arguments.
+ *
+ * Validates that arg1() and arg2() return valid values for all commands.
+ * Ensures push/pop commands have both arguments, and other commands have arg1.
+ */
 TEST_F(ParserTestObject, canReadEntireVMfile) {
     int lineCount { 0 };
     while (parser->hasMoreLines()) {
@@ -139,6 +160,12 @@ TEST_F(ParserTestObject, canReadEntireVMfile) {
     ASSERT_EQ(lineCount, 6);
 }
 
+/**
+ * @brief Tests that arg2() throws logic_error for arithmetic commands.
+ *
+ * Verifies proper error handling when arg2() is called on a command type
+ * that does not support a second argument (C_ARITHMETIC).
+ */
 TEST_F(ParserTestObject, throwsOnInvalidArg2Call) {
     parser->hasMoreLines(); 
     parser->advance();
@@ -146,5 +173,5 @@ TEST_F(ParserTestObject, throwsOnInvalidArg2Call) {
     parser->advance();
     parser->hasMoreLines();
     parser->advance();
-    EXPECT_THROW(parser->arg2(), std::runtime_error);
+    EXPECT_THROW(parser->arg2(), std::logic_error);
 }

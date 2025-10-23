@@ -54,7 +54,7 @@ CommandType Parser::commandType() const {
 std::string Parser::arg1() const {
   CommandType cmd_type { commandType() };
   if (CommandType::C_RETURN == cmd_type)
-    throw std::runtime_error("[ERROR] Should not be called on C_RETURN\n");
+    throw std::logic_error("[ERROR] Should not be called on C_RETURN\n");
   if (CommandType::C_ARITHMETIC == cmd_type)
     return m_cmd;
 
@@ -67,7 +67,7 @@ int Parser::arg2() const {
       cmd_type != CommandType::C_POP       &&
       cmd_type != CommandType::C_FUNCTION  &&
       cmd_type != CommandType::C_CALL)
-    throw std::runtime_error("[ERROR] Should not be called on C_PUSH, C_POP, C_FUNCTION, C_CALL");
+    throw std::logic_error("[ERROR] Should not be called on C_PUSH, C_POP, C_FUNCTION, C_CALL");
 
   return stoi(m_arg2);
 }

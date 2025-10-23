@@ -1,41 +1,41 @@
+/**
+ * @file codeWriter.cpp
+ * @brief Unit tests for the CodeWriter interface and assembly emission.
+ */
 #include "gtest/gtest.h"
 #include <array>
-#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <memory>
-#include <string_view>
 #include "../Modules/CodeWriter/codeWriter.h"
 
 using namespace testing;
 
 /**
- * @class ParserTestObject
- * @brief Test fixture for Parser class unit tests.
+ * @class CodeWriterTestObject
+ * @brief Test fixture for CodeWriter class unit tests.
  *
- * Creates a temporary assembly file with representative commands and
- * initializes a Parser instance for testing command parsing operations.
+ * Creates temporary VM and assembly files to test assembly code generation
+ * from VM commands via the CodeWriter interface.
  */
 class CodeWriterTestObject : public ::testing::Test {
   protected:
-    // @brief Path to the temporary assembly file used for testing
+    /** @brief Path to the temporary VM file used for testing. */
     std::filesystem::path vm_filepath;
+    /** @brief Path to the output assembly file. */
     std::filesystem::path asm_filepath;
 
-    // @brief Input file stream for reading the test assembly file.
+    /** @brief Input file stream for reading the test VM file. */
     std::ifstream filestream;
 
+    /** @brief CodeWriter instance under test. */
     std::unique_ptr<CodeWriter> codeWriter;
-  
-
-    // @brief Parser instance under test.
 
     /**
      * @brief Initializes test environment before each test case.
      *
-     * Creates a temporary `.asm` file with a sample assembly program containing
-     * A-commands, C-commands, and label declarations. Opens the file stream and
-     * constructs the Parser instance.
+     * Creates a temporary `.vm` file with sample VM commands and an output
+     * `.asm` file path. Constructs the CodeWriter instance.
      */
     void SetUp() override {
     // Setting up temporary directory
@@ -60,7 +60,7 @@ class CodeWriterTestObject : public ::testing::Test {
     /**
      * @brief Cleans up test environment after each test case.
      *
-     * Closes the file stream and removes the temporary assembly file.
+     * Closes the file stream and removes the temporary VM and assembly files.
      */
     void TearDown() override {
       filestream.close();
@@ -69,11 +69,19 @@ class CodeWriterTestObject : public ::testing::Test {
     }
 };
 
-
+/**
+ * @brief Verifies that the CodeWriter can be successfully constructed.
+ */
 TEST_F(CodeWriterTestObject, canIntializeCodeWriter) {
     ASSERT_TRUE(codeWriter);
 }
 
+/**
+ * @brief Tests that all arithmetic/logic commands emit correct assembly.
+ *
+ * Validates writeArithmetic() for all nine operations (add, sub, neg, eq,
+ * gt, lt, and, or, not) by checking for expected instruction patterns.
+ */
 TEST_F(CodeWriterTestObject, canWriteArithmetric) {
   ASSERT_TRUE(codeWriter);
 
@@ -110,6 +118,13 @@ TEST_F(CodeWriterTestObject, canWriteArithmetric) {
   EXPECT_NE(expected.find("M=!M"), std::string::npos);
 }
 
+/**
+ * @brief Tests push/pop operations across all memory segments.
+ *
+ * Validates writePushPop() for all seven segments (local, argument, this,
+ * that, temp, pointer, static, constant) by verifying emitted assembly contains
+ * expected stack pointer and memory access instructions.
+ */
 TEST_F(CodeWriterTestObject, canWritePushPopCommands) {
     ASSERT_TRUE(codeWriter);
 
