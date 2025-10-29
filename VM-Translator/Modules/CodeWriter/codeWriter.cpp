@@ -1,5 +1,6 @@
-
 #include "codeWriter.h"
+#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 
 CodeWriter::CodeWriter(const std::string& fileName) {
@@ -13,7 +14,7 @@ void CodeWriter::setFileName(const std::string& fileName) {
   if (fileName.substr(n - 4) != ".asm")
     std::runtime_error("[ERROR] Invalid filename format must have .vm in the end\n");
 
-  m_file_name = std::move(fileName);
+  m_file_name = fileName;
 
   m_output_file.open(m_file_name);
 }
@@ -86,7 +87,7 @@ void CodeWriter::writeArithmetic(const std::string& command) {
       throw std::runtime_error("Unknown arithmetic command: " + command);
 }
 
-void CodeWriter::writePushPop(CommandType cmdType, const std::string& segment, int idx) {
+void CodeWriter::writePushPop(CommandType cmdType, const std::string& segment, uint32_t idx) {
     const std::string i = std::to_string(idx);
 
     if (cmdType == C_PUSH) {
@@ -200,9 +201,177 @@ void CodeWriter::writePushPop(CommandType cmdType, const std::string& segment, i
     }
 }
 
-void writeLabel(const std::string& label) {
-
+std::string CodeWriter::qualifyLabel(const std::string& label) const {
+  return m_current_func.empty() ? label : (m_current_func + "$" + label);
 }
 
+void CodeWriter::writeLabel(const std::string& label) {
+  m_output_file << "(" << qualifyLabel(label) << ")" << '\n';
+}
 
+void CodeWriter::writeGoto(const std::string& label) {
+  m_output_file << "@" << qualifyLabel(label) << '\n'
+                << "0;JMP" << '\n';
+}
+
+void CodeWriter::writeIf(const std::string& label) {
+  m_output_file 
+    << "@SP" <<                      '\n'
+    << "AM=M-1" <<                   '\n'
+    << "D=M" <<                      '\n'
+    << "@" << qualifyLabel(label) << '\n'
+    << "D;JNE" <<                    '\n';
+}
+
+void CodeWriter::writeCall(const std::string& functionName, uint32_t nArgs) {
+  const std::string ret =
+      (m_current_func.empty() ? "" : m_current_func + "$")
+      + "ret." + std::to_string(m_labelCounter++);
+
+  m_output_file
+    << "@" << ret << "\n"
+    << "D=A\n"
+    << "@SP\n"
+    << "A=M\n"
+    << "M=D\n"
+    << "@SP\n"
+    << "M=M+1\n";
+
+  m_output_file
+    << "@LCL\n"
+    << "D=M\n"
+    << "@SP\n"
+    << "A=M\n"
+    << "M=D\n"
+    << "@SP\n"
+    << "M=M+1\n";
+
+  m_output_file
+    << "@ARG\n"
+    << "D=M\n"
+    << "@SP\n"
+    << "A=M\n"
+    << "M=D\n"
+    << "@SP\n"
+    << "M=M+1\n";
+
+  m_output_file
+    << "@THIS\n"
+    << "D=M\n"
+    << "@SP\n"
+    << "A=M\n"
+    << "M=D\n"
+    << "@SP\n"
+    << "M=M+1\n";
+
+  m_output_file
+    << "@THAT\n"
+    << "D=M\n"
+    << "@SP\n"
+    << "A=M\n"
+    << "M=D\n"
+    << "@SP\n"
+    << "M=M+1\n";
+
+  m_output_file
+    << "@SP\n"
+    << "D=M\n"
+    << "@5\n"
+    << "D=D-A\n"
+    << "@" << nArgs << "\n"
+    << "D=D-A\n"
+    << "@ARG\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@SP\n"
+    << "D=M\n"
+    << "@LCL\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@" << functionName << "\n"
+    << "0;JMP\n";
+
+  m_output_file
+    << "(" << ret << ")\n";
+}
+void CodeWriter::writeFunction(const std::string& functionName, uint32_t nLocals) {
+  m_current_func = functionName;
+
+  m_output_file << "(" << functionName << ")\n";
+
+  for (uint32_t i{}; i < nLocals; ++i) {
+    m_output_file
+      << "@0\n"
+      << "D=A\n"
+      << "@SP\n"
+      << "A=M\n"
+      << "M=D\n"
+      << "@SP\n"
+      << "M=M+1\n";
+  }
+}
+
+void CodeWriter::writeReturn() {
+  m_output_file
+    << "@LCL\n"
+    << "D=M\n"
+    << "@R13\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@5\n"
+    << "A=D-A\n"
+    << "D=M\n"
+    << "@R14\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@SP\n"
+    << "AM=M-1\n"
+    << "D=M\n"
+    << "@ARG\n"
+    << "A=M\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@ARG\n"
+    << "D=M+1\n"
+    << "@SP\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@R13\n"
+    << "AM=M-1\n"
+    << "D=M\n"
+    << "@THAT\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@R13\n"
+    << "AM=M-1\n"
+    << "D=M\n"
+    << "@THIS\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@R13\n"
+    << "AM=M-1\n"
+    << "D=M\n"
+    << "@ARG\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@R13\n"
+    << "AM=M-1\n"
+    << "D=M\n"
+    << "@LCL\n"
+    << "M=D\n";
+
+  m_output_file
+    << "@R14\n"
+    << "A=M\n"
+    << "0;JMP\n";
+}
 void CodeWriter::close() { m_output_file.close(); }

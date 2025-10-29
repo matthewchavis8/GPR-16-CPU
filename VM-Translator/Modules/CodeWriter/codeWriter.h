@@ -20,6 +20,10 @@ class CodeWriter {
     std::string m_file_name;
     /** @brief Monotonic counter used to generate unique labels. */
     int m_labelCounter{};
+
+    std::string m_current_func;
+
+    std::string qualifyLabel(const std::string& label) const;
   
     /**
      * @brief Sets the current output file context (basename used for symbols).
