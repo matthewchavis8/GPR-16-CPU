@@ -4,6 +4,7 @@
  * @file codeWriter.h
  * @brief Interface for translating VM commands into Hack assembly.
  */
+#include <cstdint>
 #include <fstream>
 #include "../Utils/CommandType.h"
 
@@ -46,7 +47,19 @@ class CodeWriter {
      * @param segment Memory segment name (e.g., "local", "argument", "this", "that", "temp", "pointer", "static", "constant").
      * @param idx Segment index.
      */
-    void writePushPop(CommandType cmdType, const std::string& segment, int idx);
+    void writePushPop(CommandType cmdType, const std::string& segment, uint32_t idx);
+
+    void writeLabel(const std::string& label);
+
+    void writeGoto(const std::string& label);
+
+    void writeIf(const std::string& label);
+
+    void writeFunction(const std::string& functionName, uint32_t nVars);
+
+    void writeCall(const std::string& functionName, uint32_t nArgs);
+
+    void writeReturn();
 
     /**
      * @brief Flushes and closes the underlying output stream.

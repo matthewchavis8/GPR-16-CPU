@@ -200,4 +200,9 @@ void CodeWriter::writePushPop(CommandType cmdType, const std::string& segment, i
     }
 }
 
+void writeLabel(const std::string& label) {
+
+}
+
+
 void CodeWriter::close() { m_output_file.close(); }
