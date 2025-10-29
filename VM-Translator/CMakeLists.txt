@@ -16,6 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Adding submodules to link
 add_subdirectory(Modules/Parser)
 add_subdirectory(Modules/CodeWriter)
+add_subdirectory(Modules/VMTranslator)
 
 
 add_executable(
@@ -27,6 +28,7 @@ add_executable(
 target_link_libraries(VM-Translator PRIVATE
   Parser
   CodeWriter
+  VMTranslator
 )
 
 # Google Test
