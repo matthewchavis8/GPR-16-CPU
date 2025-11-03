@@ -24,12 +24,9 @@ class CodeWriter {
     std::string m_current_func;
 
     std::string qualifyLabel(const std::string& label) const;
+
+    std::string m_static_base {"Static"};
   
-    /**
-     * @brief Sets the current output file context (basename used for symbols).
-     * @param file_name Output file name (used for static symbols).
-     */
-    void setFileName(const std::string& file_name);
 
   public:
     /**
@@ -45,6 +42,11 @@ class CodeWriter {
      */
     void writeArithmetic(const std::string& cmd);
     
+    /**
+     * @brief Sets the current output file context (basename used for symbols).
+     * @param file_name Output file name (used for static symbols).
+     */
+    void setFileName(const std::string& file_name);
     /**
      * @brief Writes assembly for a push or pop VM command.
      * @param cmdType Command kind (C_PUSH or C_POP).
@@ -65,6 +67,7 @@ class CodeWriter {
 
     void writeReturn();
 
+    void setCurrentFile(std::string base);
     /**
      * @brief Flushes and closes the underlying output stream.
      */

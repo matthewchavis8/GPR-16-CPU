@@ -1,6 +1,6 @@
 #include "codeWriter.h"
-#include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <stdexcept>
 
 CodeWriter::CodeWriter(const std::string& fileName) {
@@ -9,14 +9,12 @@ CodeWriter::CodeWriter(const std::string& fileName) {
 
 
 void CodeWriter::setFileName(const std::string& fileName) {
-  std::size_t n = fileName.length();
-
-  if (fileName.substr(n - 4) != ".asm")
-    std::runtime_error("[ERROR] Invalid filename format must have .vm in the end\n");
-
+  if (std::filesystem::path(fileName).extension() != ".asm")
+    throw std::runtime_error("[ERROR] Output filename must end with .asm");
   m_file_name = fileName;
-
   m_output_file.open(m_file_name);
+  if (!m_output_file)
+    throw std::runtime_error("[ERROR] Failed to open output: " + m_file_name);
 }
 
 void CodeWriter::writeArithmetic(const std::string& command) {
@@ -138,7 +136,7 @@ void CodeWriter::writePushPop(CommandType cmdType, const std::string& segment, u
         }
         else if (segment == "static") {
             m_output_file <<
-                "@Static." << idx << "\n"
+                "@" << m_static_base << "." << idx << "\n"
                 "D=M\n"
                 "@SP\n"
                 "A=M\n"
@@ -189,7 +187,7 @@ void CodeWriter::writePushPop(CommandType cmdType, const std::string& segment, u
                 "@SP\n"
                 "AM=M-1\n"
                 "D=M\n"
-                "@Static." << idx << "\n"
+                "@" << m_static_base << "." << idx << "\n"
                 "M=D\n";
         }
         else {
@@ -296,6 +294,11 @@ void CodeWriter::writeCall(const std::string& functionName, uint32_t nArgs) {
   m_output_file
     << "(" << ret << ")\n";
 }
+
+void CodeWriter::setCurrentFile(std::string base) {
+  m_static_base = std::move(base);
+}
+
 void CodeWriter::writeFunction(const std::string& functionName, uint32_t nLocals) {
   m_current_func = functionName;
 

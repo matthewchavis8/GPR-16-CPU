@@ -3,3 +3,9 @@ add_library(
   STATIC
   vmtranslator.cpp
 )
+
+target_link_libraries(VMTranslator
+  PUBLIC
+    Parser
+    CodeWriter
+)
