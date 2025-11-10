@@ -71,4 +71,6 @@ class Tokenizer {
     uint32_t intVal() const;
 
     std::string stringVal() const;
+
+    std::string getCurrentToken() const;
 };

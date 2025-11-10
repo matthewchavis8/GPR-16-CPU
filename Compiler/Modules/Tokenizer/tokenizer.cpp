@@ -169,3 +169,5 @@ std::string Tokenizer::stringVal() const {
 
   return m_currentToken;
 }
+
+std::string Tokenizer::getCurrentToken() const { return m_currentToken; }
