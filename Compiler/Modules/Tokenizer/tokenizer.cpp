@@ -171,3 +171,5 @@ std::string Tokenizer::stringVal() const {
 }
 
 std::string Tokenizer::getCurrentToken() const { return m_currentToken; }
+
+void Tokenizer::close() { m_file.close(); }

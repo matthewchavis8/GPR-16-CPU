@@ -3,11 +3,12 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <string_view>
 #include "../Modules/Tokenizer/tokenizer.h"
 
 using namespace testing;
 
-class TokenizerTestObject {
+class TokenizerTestObject : public ::testing::Test {
   protected:
     std::filesystem::path filepath;
     std::ifstream filestream;
@@ -105,7 +106,15 @@ class TokenizerTestObject {
     }
 
     void TearDown() override {
-      filestream.close();
+      tokenizer->close();
       std::filesystem::remove(filepath);
     }
 };
+
+TEST_F(TokenizerTestObject, canReadFirstToken) {
+  ASSERT_TRUE(tokenizer);
+
+  std::string_view expected { "" };
+  std::string_view cmd { tokenizer->getCurrentToken() };
+
+}

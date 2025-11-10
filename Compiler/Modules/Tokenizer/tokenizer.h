@@ -73,4 +73,6 @@ class Tokenizer {
     std::string stringVal() const;
 
     std::string getCurrentToken() const;
+
+    void close();
 };
