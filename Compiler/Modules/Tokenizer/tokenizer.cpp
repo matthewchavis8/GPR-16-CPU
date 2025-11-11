@@ -9,6 +9,18 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <cstring>
+
+static inline bool isSymbolChar(char c) {
+  static constexpr const char* kSyms = "{}()[].,;+-*/&|<>=~";
+  return std::strchr(kSyms, c) != nullptr;
+}
+
+static inline std::string_view trimTrailingSymbol(std::string_view s) {
+  if (!s.empty() && isSymbolChar(s.back()))
+    s.remove_suffix(1);
+  return s;
+}
 
 Tokenizer::Tokenizer(std::ifstream& file, const std::string& fileName)
   : m_file { file }
@@ -27,14 +39,19 @@ Tokenizer::Tokenizer(std::ifstream& file, const std::string& fileName)
     m_lookaheadBuff = std::move(nextToken);
 }
 
-bool Tokenizer::hasMoreTokens() const { return m_lookaheadBuff->empty(); }
+bool Tokenizer::hasMoreTokens() const { return m_lookaheadBuff.has_value(); }
 
 void Tokenizer::advance() {
   if (!hasMoreTokens())
     throw std::runtime_error("[ERROR] There are no more tokens\n");
 
   m_currentToken = std::move(*m_lookaheadBuff);
-  m_file >> *m_lookaheadBuff;
+
+  std::string nextToken;
+  if (m_file >> nextToken)
+    m_lookaheadBuff = std::move(nextToken);
+  else
+   m_lookaheadBuff.reset();
 }
 
 bool Tokenizer::isValidInteger(std::string_view token) const {
@@ -62,7 +79,7 @@ bool Tokenizer::isValidIdentifier(const std::string_view token) const {
 
   unsigned char c0 { static_cast<unsigned char>(token[0]) };
 
-  if (!std::isalpha(c0) || c0 == '_')
+  if (!(std::isalpha(c0) || c0 == '_'))
     return false;
 
   for (std::size_t i{1}; i < token.length(); ++i) {
@@ -73,63 +90,21 @@ bool Tokenizer::isValidIdentifier(const std::string_view token) const {
   return true;
 }
 
-std::optional<Token> Tokenizer::tokenType() const {
-  if (m_currentToken == "class" 
-      || "constructor" 
-      || "function"
-      || "method"
-      || "field"
-      || "static"
-      || "var" 
-      || "int"
-      || "char"
-      || "boolean"
-      || "void"
-      || "true"
-      || "false"
-      || "null" 
-      || "this"
-      || "let"
-      || "do"
-      || "if"
-      || "else"
-      || "while"
-      || "return"
-     )
+Token Tokenizer::tokenType() const {
+  if (lookUpKeyWord(m_currentToken))
     return Token::Keyword;
-  
-  if (m_currentToken == "{" 
-      || "}" 
-      || "("
-      || ")"
-      || "["
-      || "]"
-      || "." 
-      || ","
-      || ";"
-      || "+"
-      || "-"
-      || "*"
-      || "/"
-      || "&" 
-      || "|"
-      || "<"
-      || ">"
-      || "="
-      || "~"
-     )
+
+  if (lookUpKeySymbols(m_currentToken))
     return Token::Symbol;
 
-  if (isValidInteger(m_currentToken))
-    return Token::IntConst;
-
-  if (isValidSequence(m_currentToken))
-    return Token::StringConst;
-  
   if (isValidIdentifier(m_currentToken))
     return Token::Identifier;
+  
+  std::string_view core = trimTrailingSymbol(m_currentToken);
+  if (isValidInteger(core))
+    return Token::IntConst;
 
-  return std::nullopt;
+  return Token::StringConst;
 }
 
 Keyword Tokenizer::keyWord() const {
@@ -160,7 +135,9 @@ uint32_t Tokenizer::intVal() const {
   if (tokenType() != Token::IntConst)
     throw std::runtime_error("[ERROR] intVal() should only be called on tokenType is IntConst\n");
 
-  return std::stoi(m_currentToken);
+  std::string core { trimTrailingSymbol(m_currentToken) };
+
+  return std::stoi(core);
 }
 
 std::string Tokenizer::stringVal() const {

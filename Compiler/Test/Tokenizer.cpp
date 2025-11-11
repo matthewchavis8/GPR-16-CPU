@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <string>
 #include <string_view>
 #include "../Modules/Tokenizer/tokenizer.h"
 
@@ -111,10 +112,145 @@ class TokenizerTestObject : public ::testing::Test {
     }
 };
 
-TEST_F(TokenizerTestObject, canReadFirstToken) {
+TEST_F(TokenizerTestObject, canReadFirstLine) {
   ASSERT_TRUE(tokenizer);
 
-  std::string_view expected { "" };
-  std::string_view cmd { tokenizer->getCurrentToken() };
+  std::string_view expected
+    { "/** Tokenizer Torture Test: covers keywords, symbols, ints, strings, comments. */" };
 
+  std::string cmds;
+  for (int i{}; i < 11; ++i) {
+    std::string token { tokenizer->getCurrentToken() };
+    if (i != 0)
+      cmds.append(" ");
+    cmds += token;
+    tokenizer->advance();
+  }
+  ASSERT_EQ(expected, cmds);
 }
+
+// Keyword: "class" then Identifier right after
+TEST_F(TokenizerTestObject, Tokenizer_Keyword_ClassThenIdentifier) {
+  ASSERT_TRUE(tokenizer);
+
+  int steps = 0;
+  while (tokenizer->getCurrentToken() != "class" && tokenizer->hasMoreTokens() && steps++ < 5000)
+    tokenizer->advance();
+
+  ASSERT_EQ(tokenizer->getCurrentToken(), "class");
+  EXPECT_EQ(tokenizer->tokenType(), Token::Keyword);
+  EXPECT_EQ(tokenizer->keyWord(), Keyword::Class);
+
+  tokenizer->advance(); // expect class name next
+  EXPECT_EQ(tokenizer->tokenType(), Token::Identifier);
+  EXPECT_EQ(tokenizer->identifier(), "TokenZoo");
+}
+
+// Symbol: find the opening '{' after class name
+TEST_F(TokenizerTestObject, Tokenizer_Symbol_OpenBraceAfterClassName) {
+  ASSERT_TRUE(tokenizer);
+
+  int steps = 0;
+  while (tokenizer->getCurrentToken() != "{" && tokenizer->hasMoreTokens() && steps++ < 8000)
+    tokenizer->advance();
+
+  ASSERT_EQ(tokenizer->getCurrentToken(), "{");
+  EXPECT_EQ(tokenizer->tokenType(), Token::Symbol);
+  EXPECT_EQ(tokenizer->symbol(), '{');
+}
+
+// IntConst: find 32767 and validate intVal
+TEST_F(TokenizerTestObject, Tokenizer_IntConst_Max32767) {
+  ASSERT_TRUE(tokenizer);
+
+  int safety = 200000;
+  while (safety-- > 0) {
+    auto tt = tokenizer->tokenType();
+    if (tt == Token::IntConst && tokenizer->intVal() == 32767u)
+      break;
+
+    if (!tokenizer->hasMoreTokens())
+      FAIL() << "32767 not found in input";
+    tokenizer->advance();
+  }
+
+  // If we got here, current token is the 32767 int constant.
+  EXPECT_EQ(tokenizer->tokenType(), Token::IntConst);
+  EXPECT_EQ(tokenizer->intVal(), 32767u);
+}
+
+// Accessor guards: correct accessor works; others throw on wrong type
+TEST_F(TokenizerTestObject, Tokenizer_Accessors_ThrowOnWrongType) {
+  ASSERT_TRUE(tokenizer);
+
+  // Find a '+' symbol
+  int steps = 0;
+  while (tokenizer->getCurrentToken() != "+" && tokenizer->hasMoreTokens() && steps++ < 20000)
+    tokenizer->advance();
+
+  ASSERT_EQ(tokenizer->getCurrentToken(), "+");
+  EXPECT_EQ(tokenizer->tokenType(), Token::Symbol);
+
+  EXPECT_NO_THROW((void)tokenizer->symbol());
+  EXPECT_THROW(tokenizer->intVal(), std::runtime_error);
+  EXPECT_THROW(tokenizer->identifier(), std::runtime_error);
+  EXPECT_THROW(tokenizer->stringVal(), std::runtime_error);
+}
+
+// Sequencing: advance until EOF; hasMoreTokens() false; advance() throws
+TEST_F(TokenizerTestObject, Tokenizer_Advance_EOF_Throws) {
+  ASSERT_TRUE(tokenizer);
+
+  int safety = 100000;
+  while (tokenizer->hasMoreTokens() && safety-- > 0)
+    tokenizer->advance();
+
+  EXPECT_FALSE(tokenizer->hasMoreTokens());
+  EXPECT_THROW(tokenizer->advance(), std::runtime_error);
+}
+
+// keyWord() negative: calling on non-keyword should throw
+TEST_F(TokenizerTestObject, Tokenizer_KeyWord_ThrowsOnNonKeyword) {
+  ASSERT_TRUE(tokenizer);
+
+  // Move to "class", then one step to "TokenZoo" (identifier)
+  int steps = 0;
+  while (tokenizer->getCurrentToken() != "class" && tokenizer->hasMoreTokens() && steps++ < 5000)
+    tokenizer->advance();
+  ASSERT_EQ(tokenizer->getCurrentToken(), "class");
+  tokenizer->advance();
+
+  EXPECT_EQ(tokenizer->tokenType(), Token::Identifier);
+  EXPECT_THROW(tokenizer->keyWord(), std::runtime_error);
+}
+
+// getCurrentToken() sanity: token changes after one advance (if possible)
+TEST_F(TokenizerTestObject, Tokenizer_GetCurrentToken_EchoChangesAfterAdvance) {
+  ASSERT_TRUE(tokenizer);
+
+  auto first = tokenizer->getCurrentToken();
+  EXPECT_FALSE(first.empty());
+
+  if (tokenizer->hasMoreTokens()) {
+    tokenizer->advance();
+    auto second = tokenizer->getCurrentToken();
+    EXPECT_FALSE(second.empty());
+    EXPECT_NE(first, second);
+  }
+}
+
+// stringVal negative: not on a string token → should throw
+TEST_F(TokenizerTestObject, Tokenizer_StringVal_ThrowsWhenNotString) {
+  ASSERT_TRUE(tokenizer);
+
+  // Use a known non-string token (e.g., '+')
+  int steps = 0;
+  while (tokenizer->getCurrentToken() != "+" && tokenizer->hasMoreTokens() && steps++ < 20000)
+    tokenizer->advance();
+
+  ASSERT_EQ(tokenizer->getCurrentToken(), "+");
+  EXPECT_THROW(tokenizer->stringVal(), std::runtime_error);
+
+  // NOTE: add a positive stringVal test later when your tokenizer lexes quoted strings as one token.
+}
+

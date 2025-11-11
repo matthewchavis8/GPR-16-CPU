@@ -4,6 +4,7 @@
 #include "../Utils/tokenType.h"
 #include <cstdint>
 #include <fstream>
+#include <string_view>
 #include <optional>
 #include <string>
 
@@ -18,7 +19,7 @@ class Tokenizer {
     bool isValidSequence(std::string_view token) const;
     bool isValidIdentifier(std::string_view token) const;
     
-    static constexpr std::pair<std::string_view, Keyword> table[] = {
+    inline static constexpr std::pair<std::string_view, Keyword> table[] = {
       { "class",       Keyword::Class },
       { "constructor", Keyword::Constructor },
       { "function",    Keyword::Function },
@@ -41,6 +42,20 @@ class Tokenizer {
       { "while",       Keyword::While },
       { "return",      Keyword::Return },
     };
+  
+  inline static constexpr std::string_view kSymbols[] = {
+    "{","}","(",")","[","]",".",",",";",
+    "+","-","*","/","&","|","<",">","=","~"
+  };
+   
+  constexpr bool lookUpKeySymbols(std::string_view keySymbol) const {
+    for (auto symbol : kSymbols) {
+      if (symbol == keySymbol)
+        return true;
+    }
+    return false;
+  }
+  
 
     constexpr std::optional<Keyword> lookUpKeyWord(std::string_view keyword) const {
       for (const auto& [key, keywrd] : table) {
@@ -60,7 +75,7 @@ class Tokenizer {
 
     void advance();
 
-    std::optional<Token> tokenType() const;
+    Token tokenType() const;
 
     Keyword keyWord() const;
 
