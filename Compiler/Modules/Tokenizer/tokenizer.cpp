@@ -147,6 +147,13 @@ std::string Tokenizer::stringVal() const {
   return m_currentToken;
 }
 
-std::string Tokenizer::getCurrentToken() const { return m_currentToken; }
+std::string_view Tokenizer::getCurrentToken() const { return m_currentToken; }
+
+std::string_view Tokenizer::getNextToken() const { 
+  if (!m_lookaheadBuff.has_value())
+    throw std::runtime_error("[ERROR] There is no next token\n");
+
+  return *m_lookaheadBuff;
+}
 
 void Tokenizer::close() { m_file.close(); }
