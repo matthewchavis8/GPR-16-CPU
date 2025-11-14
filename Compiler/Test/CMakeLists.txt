@@ -11,9 +11,9 @@ foreach(test_src ${TEST_SOURCES})
     target_link_libraries(${target_name}
         PRIVATE
         GTest::gtest_main
+        CompilationEngine
         Tokenizer
         VMWriter
-        CompilationEngine
     )
 
     include(GoogleTest)

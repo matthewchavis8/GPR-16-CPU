@@ -1,4 +1,8 @@
 
+/** @file
+ *  @brief GoogleTest harness for the `Tokenizer` component.
+ */
+
 #include "gtest/gtest.h"
 #include <filesystem>
 #include <fstream>
@@ -9,6 +13,10 @@
 
 using namespace testing;
 
+/**
+ * @brief Test fixture that creates a temporary Jack file and tokenizer
+ *        instance used across multiple tokenizer tests.
+ */
 class TokenizerTestObject : public ::testing::Test {
   protected:
     std::filesystem::path filepath;
@@ -112,6 +120,10 @@ class TokenizerTestObject : public ::testing::Test {
     }
 };
 
+/** @test
+ *  @brief Asserts that the tokenizer can reconstruct the first comment line
+ *         when tokens are concatenated with spaces.
+ */
 TEST_F(TokenizerTestObject, canReadFirstLine) {
   ASSERT_TRUE(tokenizer);
 
@@ -129,7 +141,10 @@ TEST_F(TokenizerTestObject, canReadFirstLine) {
   ASSERT_EQ(expected, cmds);
 }
 
-// Keyword: "class" then Identifier right after
+/** @test
+ *  @brief Verifies that a `class` keyword token is followed by an identifier
+ *         token for the class name.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_Keyword_ClassThenIdentifier) {
   ASSERT_TRUE(tokenizer);
 
@@ -146,7 +161,9 @@ TEST_F(TokenizerTestObject, Tokenizer_Keyword_ClassThenIdentifier) {
   EXPECT_EQ(tokenizer->identifier(), "TokenZoo");
 }
 
-// Symbol: find the opening '{' after class name
+/** @test
+ *  @brief Finds the `{` symbol following the class name and checks symbol access.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_Symbol_OpenBraceAfterClassName) {
   ASSERT_TRUE(tokenizer);
 
@@ -159,7 +176,10 @@ TEST_F(TokenizerTestObject, Tokenizer_Symbol_OpenBraceAfterClassName) {
   EXPECT_EQ(tokenizer->symbol(), '{');
 }
 
-// IntConst: find 32767 and validate intVal
+/** @test
+ *  @brief Locates the `32767` literal and validates that it is reported as an
+ *         `IntConst` with the correct value.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_IntConst_Max32767) {
   ASSERT_TRUE(tokenizer);
 
@@ -179,7 +199,10 @@ TEST_F(TokenizerTestObject, Tokenizer_IntConst_Max32767) {
   EXPECT_EQ(tokenizer->intVal(), 32767u);
 }
 
-// Accessor guards: correct accessor works; others throw on wrong type
+/** @test
+ *  @brief Confirms that calling the wrong accessor for a token type throws
+ *         `std::runtime_error`, while the correct accessor succeeds.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_Accessors_ThrowOnWrongType) {
   ASSERT_TRUE(tokenizer);
 
@@ -197,7 +220,10 @@ TEST_F(TokenizerTestObject, Tokenizer_Accessors_ThrowOnWrongType) {
   EXPECT_THROW(tokenizer->stringVal(), std::runtime_error);
 }
 
-// Sequencing: advance until EOF; hasMoreTokens() false; advance() throws
+/** @test
+ *  @brief Advances to EOF and verifies that `hasMoreTokens()` becomes false and
+ *         a further `advance()` call throws.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_Advance_EOF_Throws) {
   ASSERT_TRUE(tokenizer);
 
@@ -209,7 +235,9 @@ TEST_F(TokenizerTestObject, Tokenizer_Advance_EOF_Throws) {
   EXPECT_THROW(tokenizer->advance(), std::runtime_error);
 }
 
-// keyWord() negative: calling on non-keyword should throw
+/** @test
+ *  @brief Ensures that `keyWord()` throws when invoked on a non-keyword token.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_KeyWord_ThrowsOnNonKeyword) {
   ASSERT_TRUE(tokenizer);
 
@@ -224,7 +252,10 @@ TEST_F(TokenizerTestObject, Tokenizer_KeyWord_ThrowsOnNonKeyword) {
   EXPECT_THROW(tokenizer->keyWord(), std::runtime_error);
 }
 
-// getCurrentToken() sanity: token changes after one advance (if possible)
+/** @test
+ *  @brief Sanity check that `getCurrentToken()` reflects changes after
+ *         `advance()`.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_GetCurrentToken_EchoChangesAfterAdvance) {
   ASSERT_TRUE(tokenizer);
 
@@ -239,7 +270,9 @@ TEST_F(TokenizerTestObject, Tokenizer_GetCurrentToken_EchoChangesAfterAdvance) {
   }
 }
 
-// stringVal negative: not on a string token → should throw
+/** @test
+ *  @brief Verifies that `stringVal()` throws when called on a non-string token.
+ */
 TEST_F(TokenizerTestObject, Tokenizer_StringVal_ThrowsWhenNotString) {
   ASSERT_TRUE(tokenizer);
 

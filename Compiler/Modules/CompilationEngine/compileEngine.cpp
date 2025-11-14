@@ -82,6 +82,14 @@ std::string_view kwToStr(Keyword k) {
   return "?";
 }
 
+void CompilationEngine::openTag(std::string_view name) {
+  m_output_file << "<" << name << ">" << '\n';
+}
+
+void CompilationEngine::closeTag(std::string_view name) {
+  m_output_file << "</" << name << ">" << '\n';
+}
+
 bool CompilationEngine::isTypeToken() const {
   if (m_tokenizer.tokenType() != Token::Keyword)
     return false;
@@ -139,28 +147,33 @@ bool CompilationEngine::isOp(char c) {
 
 void CompilationEngine::emitKeyWordAndAdvance() {
   m_output_file << "<keyword> " << kwToStr(m_tokenizer.keyWord()) << " </keyword>" << '\n';
-  m_tokenizer.advance();
+  if (m_tokenizer.hasMoreTokens())
+    m_tokenizer.advance();
 }
 
 void CompilationEngine::emitSymbolAndAdvance() {
   std::string str(1, m_tokenizer.symbol());
   m_output_file << "<symbol> " << xmlEscape(str) << " </symbol>" << '\n';
-  m_tokenizer.advance();
+  if (m_tokenizer.hasMoreTokens())
+    m_tokenizer.advance();
 }
 
 void CompilationEngine::emitIdentifierAndAdvance() {
   m_output_file << "<identifier> " << m_tokenizer.identifier() << " </identifier>" << '\n';
-  m_tokenizer.advance();
+  if (m_tokenizer.hasMoreTokens())
+    m_tokenizer.advance();
 }
 
 void CompilationEngine::emitIntAndAdvance() {
   m_output_file << "<intConstant> " << m_tokenizer.intVal() << " </intConstant>" << '\n';
-  m_tokenizer.advance();
+  if (m_tokenizer.hasMoreTokens())
+    m_tokenizer.advance();
 }
 
 void CompilationEngine::emitStringAndAdvance() {
   m_output_file << "<stringConstant> " << m_tokenizer.intVal() << " </stringConstant>" << '\n';
-  m_tokenizer.advance();
+  if (m_tokenizer.hasMoreTokens())
+    m_tokenizer.advance();
 }
 
 void CompilationEngine::compileClass() {
