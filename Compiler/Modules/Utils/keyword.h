@@ -1,3 +1,7 @@
+/** @file
+ *  @brief Enumeration of all Jack language keywords recognized by the tokenizer.
+ */
+
 #pragma once
 
 enum class Keyword {

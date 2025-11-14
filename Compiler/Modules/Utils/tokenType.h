@@ -1,3 +1,7 @@
+/** @file
+ *  @brief Enumeration of high-level token categories produced by the tokenizer.
+ */
+
 #pragma once
 
 enum class Token {
