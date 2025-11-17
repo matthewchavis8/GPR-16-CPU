@@ -23,8 +23,12 @@ class Tokenizer {
     std::optional<std::string> m_lookaheadBuff;
     std::string m_fileName;
     
+    // Low-level scanner: read the next raw token from the input stream.
+    // Handles skipping whitespace and comments, and splits symbols from
+    // identifiers/integers according to the Jack language specification.
+    std::optional<std::string> nextTokenFromStream();
+    
     bool isValidInteger(std::string_view token) const;
-    bool isValidSequence(std::string_view token) const;
     bool isValidIdentifier(std::string_view token) const;
     
     inline static constexpr std::pair<std::string_view, Keyword> table[] = {

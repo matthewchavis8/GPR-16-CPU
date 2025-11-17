@@ -15,6 +15,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Adding submodules to link
 add_subdirectory(Modules/CompilationEngine)
+add_subdirectory(Modules/CompilerAnalyzer)
 add_subdirectory(Modules/SymbolTable)
 add_subdirectory(Modules/Tokenizer)
 add_subdirectory(Modules/VMWriter)
@@ -27,9 +28,8 @@ add_executable(
 
 # Linking static libs to executable
 target_link_libraries(Compiler PRIVATE
-  CompilationEngine
+  CompilerAnalyzer
   SymbolTable
-  Tokenizer
   VMWriter
 )
 

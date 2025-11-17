@@ -121,24 +121,17 @@ class TokenizerTestObject : public ::testing::Test {
 };
 
 /** @test
- *  @brief Asserts that the tokenizer can reconstruct the first comment line
- *         when tokens are concatenated with spaces.
+ *  @brief Asserts that the tokenizer skips leading comments and starts at the
+ *         first real Jack token in the file.
  */
 TEST_F(TokenizerTestObject, canReadFirstLine) {
   ASSERT_TRUE(tokenizer);
 
-  std::string_view expected
-    { "/** Tokenizer Torture Test: covers keywords, symbols, ints, strings, comments. */" };
-
-  std::string cmds;
-  for (int i{}; i < 11; ++i) {
-    std::string token { tokenizer->getCurrentToken() };
-    if (i != 0)
-      cmds.append(" ");
-    cmds += token;
-    tokenizer->advance();
-  }
-  ASSERT_EQ(expected, cmds);
+  // After construction, the tokenizer should have skipped the initial
+  // comment block(s) and be positioned at the first real token: `class`.
+  EXPECT_EQ(tokenizer->getCurrentToken(), "class");
+  EXPECT_EQ(tokenizer->tokenType(), Token::Keyword);
+  EXPECT_EQ(tokenizer->keyWord(), Keyword::Class);
 }
 
 /** @test

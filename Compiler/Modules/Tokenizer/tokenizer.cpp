@@ -16,12 +16,6 @@ static inline bool isSymbolChar(char c) {
   return std::strchr(kSyms, c) != nullptr;
 }
 
-static inline std::string_view trimTrailingSymbol(std::string_view s) {
-  if (!s.empty() && isSymbolChar(s.back()))
-    s.remove_suffix(1);
-  return s;
-}
-
 Tokenizer::Tokenizer(std::ifstream& file, const std::string& fileName)
   : m_file { file }
   , m_fileName { fileName }
@@ -33,10 +27,14 @@ Tokenizer::Tokenizer(std::ifstream& file, const std::string& fileName)
   if (m_fileName.substr(fileNameLength - 5) != ".jack")
     throw std::logic_error("[ERROR] unable to open the jack file\n");
 
-  m_file >> m_currentToken;
-  std::string nextToken;
-  if (m_file >> nextToken)
-    m_lookaheadBuff = std::move(nextToken);
+  auto firstToken = nextTokenFromStream();
+  if (!firstToken)
+    throw std::logic_error("[ERROR] empty Jack source file\n");
+
+  m_currentToken = std::move(*firstToken);
+
+  if (auto secondToken = nextTokenFromStream())
+    m_lookaheadBuff = std::move(*secondToken);
 }
 
 bool Tokenizer::hasMoreTokens() const { return m_lookaheadBuff.has_value(); }
@@ -47,11 +45,10 @@ void Tokenizer::advance() {
 
   m_currentToken = std::move(*m_lookaheadBuff);
 
-  std::string nextToken;
-  if (m_file >> nextToken)
-    m_lookaheadBuff = std::move(nextToken);
+  if (auto nextToken = nextTokenFromStream())
+    m_lookaheadBuff = std::move(*nextToken);
   else
-   m_lookaheadBuff.reset();
+    m_lookaheadBuff.reset();
 }
 
 bool Tokenizer::isValidInteger(std::string_view token) const {
@@ -60,14 +57,6 @@ bool Tokenizer::isValidInteger(std::string_view token) const {
 
   for (unsigned char c : token) {
     if (c < '0' || c > '9')
-      return false;
-  }
-  return true;
-}
-
-bool Tokenizer::isValidSequence(std::string_view token) const {
-  for (unsigned char c : token) {
-    if (c == '\n' || c == '\r' || c == '\'' || c == '\"')
       return false;
   }
   return true;
@@ -97,12 +86,11 @@ Token Tokenizer::tokenType() const {
   if (lookUpKeySymbols(m_currentToken))
     return Token::Symbol;
 
+  if (isValidInteger(m_currentToken))
+    return Token::IntConst;
+
   if (isValidIdentifier(m_currentToken))
     return Token::Identifier;
-  
-  std::string_view core = trimTrailingSymbol(m_currentToken);
-  if (isValidInteger(core))
-    return Token::IntConst;
 
   return Token::StringConst;
 }
@@ -135,9 +123,7 @@ uint32_t Tokenizer::intVal() const {
   if (tokenType() != Token::IntConst)
     throw std::runtime_error("[ERROR] intVal() should only be called on tokenType is IntConst\n");
 
-  std::string core { trimTrailingSymbol(m_currentToken) };
-
-  return std::stoi(core);
+  return std::stoi(m_currentToken);
 }
 
 std::string Tokenizer::stringVal() const {
@@ -157,3 +143,85 @@ std::string_view Tokenizer::getNextToken() const {
 }
 
 void Tokenizer::close() { m_file.close(); }
+
+std::optional<std::string> Tokenizer::nextTokenFromStream() {
+  char c;
+
+  while (true) {
+    // Skip whitespace
+    while (m_file.get(c)) {
+      if (!std::isspace(static_cast<unsigned char>(c)))
+        break;
+    }
+
+    if (!m_file)
+      return std::nullopt;
+
+    // Handle comments or '/' symbol
+    if (c == '/') {
+      char d;
+      if (!m_file.get(d)) {
+        // Just '/' at EOF – treat as symbol
+        return std::string(1, c);
+      }
+
+      if (d == '/') {
+        // Single-line comment: skip until end of line
+        while (m_file.get(c)) {
+          if (c == '\n')
+            break;
+        }
+        if (!m_file)
+          return std::nullopt;
+        continue; // restart scanning for next token
+      } else if (d == '*') {
+        // Block comment: skip until "*/"
+        char prev = 0;
+        while (m_file.get(c)) {
+          if (prev == '*' && c == '/')
+            break;
+          prev = c;
+        }
+        if (!m_file)
+          return std::nullopt;
+        continue; // restart scanning
+      } else {
+        // Not a comment: put back the second character and return '/' as symbol
+        m_file.unget();
+        return std::string(1, c);
+      }
+    }
+
+    // String constant: everything between double quotes (without quotes)
+    if (c == '"') {
+      std::string s;
+      while (m_file.get(c)) {
+        if (c == '"')
+          break;
+        s.push_back(c);
+      }
+      // If EOF is reached without closing quote, we still return what we have.
+      return s;
+    }
+
+    // Single-character symbol
+    if (isSymbolChar(c)) {
+      return std::string(1, c);
+    }
+
+    // Identifier or integer: accumulate until whitespace, symbol, quote, or '/'
+    std::string token;
+    token.push_back(c);
+
+    while (m_file.get(c)) {
+      if (std::isspace(static_cast<unsigned char>(c)) || isSymbolChar(c) || c == '"' || c == '/') {
+        // Put back the delimiter so it will be processed on the next call
+        m_file.unget();
+        break;
+      }
+      token.push_back(c);
+    }
+
+    return token;
+  }
+}

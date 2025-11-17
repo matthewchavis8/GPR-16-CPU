@@ -5,6 +5,6 @@ add_library(
 )
 
 target_link_libraries(CompilationEngine
-  PRIVATE
+  PUBLIC
   Tokenizer
 )

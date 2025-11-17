@@ -7,7 +7,6 @@
 #include <fstream>
 #include <iterator>
 #include <memory>
-#include <string>
 #include <string_view>
 #include "../Modules/Tokenizer/tokenizer.h"
 #include "../Modules/CompilationEngine/compileEngine.h"

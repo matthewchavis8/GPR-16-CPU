@@ -1,7 +1,6 @@
 #include "compileEngine.h"
 #include "../Tokenizer/tokenizer.h"
 #include <fstream>
-#include <initializer_list>
 #include <stdexcept>
 #include <string_view>
 
@@ -91,19 +90,18 @@ void CompilationEngine::closeTag(std::string_view name) {
 }
 
 bool CompilationEngine::isTypeToken() const {
-  if (m_tokenizer.tokenType() != Token::Keyword)
-    return false;
-
-  switch (m_tokenizer.keyWord()) {
-    case Keyword::Int:
-      return true;
-    case Keyword::Char:
-      return true;
-    case Keyword::Boolean:
-      return true;
-    default:
-      return false;
+  if (m_tokenizer.tokenType() == Token::Keyword) {
+    switch (m_tokenizer.keyWord()) {
+      case Keyword::Int:
+      case Keyword::Char:
+      case Keyword::Boolean:
+        return true;
+      default:
+        return false;
+    }
   }
+
+  // User-defined class names are identifiers and are also valid types.
   return m_tokenizer.tokenType() == Token::Identifier;
 }
 
@@ -171,7 +169,7 @@ void CompilationEngine::emitIntAndAdvance() {
 }
 
 void CompilationEngine::emitStringAndAdvance() {
-  m_output_file << "<stringConstant> " << m_tokenizer.intVal() << " </stringConstant>" << '\n';
+  m_output_file << "<stringConstant> " << m_tokenizer.stringVal() << " </stringConstant>" << '\n';
   if (m_tokenizer.hasMoreTokens())
     m_tokenizer.advance();
 }
@@ -182,13 +180,13 @@ void CompilationEngine::compileClass() {
   if (m_tokenizer.tokenType() != Token::Keyword)
     throw std::runtime_error("[ERROR] Expected Class");
   emitKeyWordAndAdvance();
-  
+
   if (m_tokenizer.tokenType() != Token::Identifier)
     throw std::runtime_error("[ERROR] Expected identifier");
   emitIdentifierAndAdvance();
-  
+
   if (m_tokenizer.tokenType() != Token::Symbol)
-    throw std::runtime_error("[ERROR] Expected Symbol");
+    throw std::runtime_error("[ERROR] Expected '{' after class name");
   emitSymbolAndAdvance();
 
   while (m_tokenizer.tokenType() == Token::Keyword) {
@@ -201,14 +199,14 @@ void CompilationEngine::compileClass() {
   
   while (m_tokenizer.tokenType() == Token::Keyword) {
     Keyword k { m_tokenizer.keyWord() };
-    if (k == Keyword::Constructor || k == Keyword::Function)
+    if (k == Keyword::Constructor || k == Keyword::Function || k == Keyword::Method)
       compileSubroutine();
     else
       break;
   }
   
   if (m_tokenizer.tokenType() != Token::Symbol)
-    throw std::runtime_error("[ERROR] Expected Symbol");
+    throw std::runtime_error("[ERROR] Expected '}' at end of class");
   emitSymbolAndAdvance();
 
   
@@ -328,7 +326,7 @@ void CompilationEngine::compileParameterList() {
   closeTag("parameterList");
 }
 
-void CompilationEngine::compileSubroutineBody() {
+void CompilationEngine::compileSubroutineBody() {;
   openTag("subroutineBody");
 
   if (m_tokenizer.tokenType() != Token::Symbol || m_tokenizer.symbol() != '{')
@@ -354,13 +352,13 @@ void CompilationEngine::compileVarDec() {
     throw std::runtime_error("[ERROR] expected 'var'");
   emitKeyWordAndAdvance();
 
-  if (!isTypeToken()) 
+  if (!isTypeToken())
     throw std::runtime_error("[ERROR] expected var type");
   if (m_tokenizer.tokenType() == Token::Keyword) 
     emitKeyWordAndAdvance();
   else 
     emitIdentifierAndAdvance();
-
+  
   if (m_tokenizer.tokenType() != Token::Identifier)
     throw std::runtime_error("[ERROR] expected varName");
   emitIdentifierAndAdvance();
