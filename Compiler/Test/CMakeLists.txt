@@ -14,6 +14,7 @@ foreach(test_src ${TEST_SOURCES})
         CompilationEngine
         Tokenizer
         VMWriter
+        SymbolTable
     )
 
     include(GoogleTest)
