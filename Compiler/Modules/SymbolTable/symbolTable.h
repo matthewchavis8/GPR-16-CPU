@@ -16,16 +16,16 @@ using Table = std::unordered_map<std::string, Symbol>;
 
 class SymbolTable {
   private:
-    Table m_classScopeTable;
-    Table m_subroutineScopeTable;
+    Table    m_table;
 
     uint32_t m_staticCnt{};
     uint32_t m_fieldCnt{};
     uint32_t m_argCnt{};
     uint32_t m_varCnt{};
+    uint32_t m_Idx{};
 
   public:
-    SymbolTable();
+    SymbolTable() = default;
     SymbolTable& operator=(const SymbolTable&) = delete;
 
     void reset();
