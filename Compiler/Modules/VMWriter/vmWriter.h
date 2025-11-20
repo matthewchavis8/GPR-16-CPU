@@ -12,7 +12,7 @@ class VmWriter {
 
     std::string segmentToStr(Segment segment) {
       switch (segment) {
-        case Segment::Argument: return "arg";
+        case Segment::Argument: return "argument";
         case Segment::Constant: return "constant";
         case Segment::Local:    return "local";
         case Segment::Pointer:  return "pointer";
@@ -21,6 +21,7 @@ class VmWriter {
         case Segment::This:     return "this";
         case Segment::That:     return "that";
       }
+      return "";
     }
     
     std::string cmdToStr(Command cmd) {
@@ -35,6 +36,7 @@ class VmWriter {
         case Command::Or:  return "or";
         case Command::Sub: return "sub";
       }
+      return "";
     }
 
   public:
