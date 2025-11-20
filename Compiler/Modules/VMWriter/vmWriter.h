@@ -10,6 +10,33 @@ class VmWriter {
   private:
     std::ofstream& m_vmFile;
 
+    std::string segmentToStr(Segment segment) {
+      switch (segment) {
+        case Segment::Argument: return "arg";
+        case Segment::Constant: return "constant";
+        case Segment::Local:    return "local";
+        case Segment::Pointer:  return "pointer";
+        case Segment::Static:   return "static";
+        case Segment::Temp:     return "temp";
+        case Segment::This:     return "this";
+        case Segment::That:     return "that";
+      }
+    }
+    
+    std::string cmdToStr(Command cmd) {
+      switch (cmd) {
+        case Command::Add: return "add";
+        case Command::And: return "and";
+        case Command::Eq:  return "eq";
+        case Command::Gt:  return "gt";
+        case Command::Neg: return "neg";
+        case Command::Lt:  return "lt";
+        case Command::Not: return "not";
+        case Command::Or:  return "or";
+        case Command::Sub: return "sub";
+      }
+    }
+
   public:
     VmWriter(std::ofstream& vmFile);
     VmWriter& operator=(VmWriter&) = delete;
