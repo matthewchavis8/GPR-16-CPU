@@ -10,52 +10,67 @@
 #include <string_view>
 #include "../Modules/Tokenizer/tokenizer.h"
 #include "../Modules/CompilationEngine/compileEngine.h"
+#include "../Modules/VMWriter/vmWriter.h"
 
 using namespace testing;
 
 /**
  * @brief Test fixture that creates a temporary Jack source file and runs it
- *        through the `CompilationEngine` to produce XML output.
+ *        through the `CompilationEngine` to produce VM output.
  */
 class CompilationEngineTestObject : public ::testing::Test {
   protected:
     std::filesystem::path jackPath;
-    std::filesystem::path xmlPath;
+    std::filesystem::path vmPath;
     std::ifstream input;
     std::ofstream output;
     std::unique_ptr<Tokenizer> tokenizer;
+    std::unique_ptr<VmWriter> vmWriter;
     std::unique_ptr<CompilationEngine> engine;
 
     /**
-     * @brief Rebuilds the temporary Jack and XML files and reinitializes
+     * @brief Rebuilds the temporary Jack and VM files and reinitializes
      *        `Tokenizer` and `CompilationEngine` from the provided source.
      */
     void rebuildWithSource(std::initializer_list<std::string_view> lines) {
       if (tokenizer)
         tokenizer->close();
       tokenizer.reset();
+      vmWriter.reset();
+      engine.reset();
 
       if (input.is_open())
         input.close();
       if (output.is_open())
         output.close();
+      
+      input.clear();
+      output.clear();
 
       {
         std::ofstream jack(jackPath);
         for (auto line : lines)
           jack << line << '\n';
+        jack.flush();
+        jack.close();
       }
 
       input.open(jackPath, std::ios::in);
-      output.open(xmlPath, std::ios::out | std::ios::trunc);
+      if (!input.is_open())
+        throw std::runtime_error("Failed to open jack file for reading");
+      
+      output.open(vmPath, std::ios::out | std::ios::trunc);
+      if (!output.is_open())
+        throw std::runtime_error("Failed to open vm file for writing");
 
-      tokenizer = std::make_unique<Tokenizer>(input, jackPath.string());
-      engine = std::make_unique<CompilationEngine>(*tokenizer, output);
+      tokenizer = std::make_unique<Tokenizer>(input);
+      vmWriter = std::make_unique<VmWriter>(output);
+      engine = std::make_unique<CompilationEngine>(*tokenizer, *vmWriter);
     }
 
     void SetUp() override {
       jackPath = std::filesystem::temp_directory_path() / "ce_tmp.jack";
-      xmlPath  = std::filesystem::temp_directory_path() / "ce_tmp.xml";
+      vmPath  = std::filesystem::temp_directory_path() / "ce_tmp.vm";
 
       rebuildWithSource({
         "class Main {",
@@ -73,16 +88,16 @@ class CompilationEngineTestObject : public ::testing::Test {
         output.close();
       if (!jackPath.empty())
         std::filesystem::remove(jackPath);
-      if (!xmlPath.empty())
-        std::filesystem::remove(xmlPath);
+      if (!vmPath.empty())
+        std::filesystem::remove(vmPath);
     }
 };
 
 /** @test
- *  @brief Compiles a minimal class and asserts that non-empty XML containing
- *         `<class>` and the `class` keyword is produced.
+ *  @brief Compiles a minimal class and asserts that non-empty VM code containing
+ *         a function declaration and return statement is produced.
  */
-TEST_F(CompilationEngineTestObject, CompilationEngine_CompilesSimpleClassToXml) {
+TEST_F(CompilationEngineTestObject, CompilationEngine_CompilesSimpleClassToVM) {
   ASSERT_TRUE(tokenizer);
   ASSERT_TRUE(engine);
 
@@ -91,21 +106,21 @@ TEST_F(CompilationEngineTestObject, CompilationEngine_CompilesSimpleClassToXml) 
   output.flush();
   output.close();
 
-  std::ifstream xml(xmlPath);
-  ASSERT_TRUE(xml.is_open());
+  std::ifstream vm(vmPath);
+  ASSERT_TRUE(vm.is_open());
 
-  std::string xmlContent((std::istreambuf_iterator<char>(xml)),
+  std::string vmContent((std::istreambuf_iterator<char>(vm)),
                          std::istreambuf_iterator<char>());
 
-  EXPECT_FALSE(xmlContent.empty());
-  EXPECT_NE(xmlContent.find("<class>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("</class>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<keyword> class </keyword>"), std::string::npos);
+  EXPECT_FALSE(vmContent.empty());
+  EXPECT_NE(vmContent.find("function Main.main"), std::string::npos);
+  EXPECT_NE(vmContent.find("push constant 0"), std::string::npos);
+  EXPECT_NE(vmContent.find("return"), std::string::npos);
 }
 
 /** @test
  *  @brief Exercises `var` declaration and a simple `let` assignment and checks
- *         that the corresponding XML nodes are present.
+ *         that the corresponding VM code is present.
  */
 TEST_F(CompilationEngineTestObject, CompilationEngine_ParsesVarAndLetStatement) {
   rebuildWithSource({
@@ -126,22 +141,21 @@ TEST_F(CompilationEngineTestObject, CompilationEngine_ParsesVarAndLetStatement) 
   output.flush();
   output.close();
 
-  std::ifstream xml(xmlPath);
-  ASSERT_TRUE(xml.is_open());
+  std::ifstream vm(vmPath);
+  ASSERT_TRUE(vm.is_open());
 
-  std::string xmlContent((std::istreambuf_iterator<char>(xml)),
+  std::string vmContent((std::istreambuf_iterator<char>(vm)),
                          std::istreambuf_iterator<char>());
 
-  EXPECT_NE(xmlContent.find("<varDec>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<letStatement>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<keyword> let </keyword>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<identifier> x </identifier>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<intConstant> 1 </intConstant>"), std::string::npos);
+  EXPECT_NE(vmContent.find("function Main.main 1"), std::string::npos);
+  EXPECT_NE(vmContent.find("push constant 1"), std::string::npos);
+  EXPECT_NE(vmContent.find("pop local 0"), std::string::npos);
+  EXPECT_NE(vmContent.find("return"), std::string::npos);
 }
 
 /** @test
  *  @brief Verifies that `if`/`else`, `while`, `do` calls, and `return`
- *         statements are compiled into the expected XML elements.
+ *         statements are compiled into the expected VM code with labels and calls.
  */
 TEST_F(CompilationEngineTestObject, CompilationEngine_ParsesIfWhileDoAndReturn) {
   rebuildWithSource({
@@ -172,16 +186,18 @@ TEST_F(CompilationEngineTestObject, CompilationEngine_ParsesIfWhileDoAndReturn) 
   output.flush();
   output.close();
 
-  std::ifstream xml(xmlPath);
-  ASSERT_TRUE(xml.is_open());
+  std::ifstream vm(vmPath);
+  ASSERT_TRUE(vm.is_open());
 
-  std::string xmlContent((std::istreambuf_iterator<char>(xml)),
+  std::string vmContent((std::istreambuf_iterator<char>(vm)),
                          std::istreambuf_iterator<char>());
 
-  EXPECT_NE(xmlContent.find("<ifStatement>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<whileStatement>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<doStatement>"), std::string::npos);
-  EXPECT_NE(xmlContent.find("<returnStatement>"), std::string::npos);
+  EXPECT_NE(vmContent.find("if-goto"), std::string::npos);
+  EXPECT_NE(vmContent.find("label"), std::string::npos);
+  EXPECT_NE(vmContent.find("goto"), std::string::npos);
+  EXPECT_NE(vmContent.find("call Output.printInt"), std::string::npos);
+  EXPECT_NE(vmContent.find("call Output.println"), std::string::npos);
+  EXPECT_NE(vmContent.find("return"), std::string::npos);
 }
 
 /** @test

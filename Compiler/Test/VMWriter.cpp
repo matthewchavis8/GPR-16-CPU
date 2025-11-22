@@ -94,11 +94,11 @@ TEST_F(VmWriter_F, can_write_call) {
 }
 
 TEST_F(VmWriter_F, can_write_if) {
-  vmWriter->writeIf("num < 2");
+  vmWriter->writeIf("LOOP");
   
   vmWriter->close();
   std::string res { fetchFileContent() };
-  std::string expected { "if num < 2\n" };
+  std::string expected { "if-goto LOOP\n" };
 
   ASSERT_EQ(res, expected);
 }

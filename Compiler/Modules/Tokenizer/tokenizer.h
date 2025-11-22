@@ -21,16 +21,21 @@ class Tokenizer {
     std::ifstream& m_file;
     std::string m_currentToken;
     std::optional<std::string> m_lookaheadBuff;
-    std::string m_fileName;
     
-    // Low-level scanner: read the next raw token from the input stream.
-    // Handles skipping whitespace and comments, and splits symbols from
-    // identifiers/integers according to the Jack language specification.
+    /**
+     * @brief Low-level scanner: read the next raw token from the input stream.
+     *        Handles skipping whitespace and comments, and splits symbols
+     *        from identifiers/integers according to the Jack specification.
+     */
     std::optional<std::string> nextTokenFromStream();
     
+    /** @brief Return true if the given text is a valid Jack integer constant. */
     bool isValidInteger(std::string_view token) const;
+
+    /** @brief Return true if the given text is a valid Jack identifier name. */
     bool isValidIdentifier(std::string_view token) const;
     
+    /** @brief Lookup table mapping keyword strings to `Keyword` enum values. */
     inline static constexpr std::pair<std::string_view, Keyword> table[] = {
       { "class",       Keyword::Class },
       { "constructor", Keyword::Constructor },
@@ -55,11 +60,13 @@ class Tokenizer {
       { "return",      Keyword::Return },
     };
   
+  /** @brief Set of all single-character Jack symbol tokens. */
   inline static constexpr std::string_view kSymbols[] = {
     "{","}","(",")","[","]",".",",",";",
     "+","-","*","/","&","|","<",">","=","~"
   };
    
+  /** @brief Check whether the given string matches a Jack symbol. */
   constexpr bool lookUpKeySymbols(std::string_view keySymbol) const {
     for (auto symbol : kSymbols) {
       if (symbol == keySymbol)
@@ -69,6 +76,7 @@ class Tokenizer {
   }
   
 
+    /** @brief Look up the `Keyword` enum value for a given keyword string. */
     constexpr std::optional<Keyword> lookUpKeyWord(std::string_view keyword) const {
       for (const auto& [key, keywrd] : table) {
         if (key == keyword)
@@ -80,11 +88,9 @@ class Tokenizer {
   public:
     /**
      * @brief Construct a tokenizer for the given input stream.
-     * @param file      Open input stream positioned at the start of a Jack file.
-     * @param fileName  Human-readable name of the file for diagnostics.
+     * @param file Open input stream positioned at the start of a Jack file.
      */
-    Tokenizer(std::ifstream& file, const std::string& fileName);
-
+    Tokenizer(std::ifstream& file);
     Tokenizer(const Tokenizer&) = delete;
     Tokenizer& operator=(const Tokenizer&) = delete;
 

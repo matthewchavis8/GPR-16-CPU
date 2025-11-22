@@ -1,3 +1,6 @@
+/** @file
+ *  @brief Enumeration of all supported VM arithmetic/logical commands.
+ */
 #pragma once
 
 enum class Command {

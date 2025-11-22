@@ -16,23 +16,16 @@ static inline bool isSymbolChar(char c) {
   return std::strchr(kSyms, c) != nullptr;
 }
 
-Tokenizer::Tokenizer(std::ifstream& file, const std::string& fileName)
-  : m_file { file }
-  , m_fileName { fileName }
+Tokenizer::Tokenizer(std::ifstream& file): m_file { file }
 {
-  if (!file.is_open())
-    throw std::logic_error("[ERROR] Unable to open file\n");
-  
-  std::size_t fileNameLength = fileName.length();
-  if (m_fileName.substr(fileNameLength - 5) != ".jack")
-    throw std::logic_error("[ERROR] unable to open the jack file\n");
-
+  if (!m_file.is_open() || !m_file.good())
+    throw std::runtime_error("[ERROR] Tokenizer: input file is not open or not readable");
+    
   auto firstToken = nextTokenFromStream();
-  if (!firstToken)
-    throw std::logic_error("[ERROR] empty Jack source file\n");
-
+  if (!firstToken.has_value())
+    throw std::runtime_error("[ERROR] Tokenizer: no tokens found in input file");
+    
   m_currentToken = std::move(*firstToken);
-
   if (auto secondToken = nextTokenFromStream())
     m_lookaheadBuff = std::move(*secondToken);
 }

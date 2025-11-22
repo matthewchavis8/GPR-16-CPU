@@ -7,4 +7,6 @@ add_library(
 target_link_libraries(CompilationEngine
   PUBLIC
   Tokenizer
+  VMWriter
+  SymbolTable
 )

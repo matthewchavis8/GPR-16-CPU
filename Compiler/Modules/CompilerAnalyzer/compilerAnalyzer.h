@@ -1,27 +1,35 @@
+/** @file
+ *  @brief High-level façade that owns compiler modules and drives compilation.
+ */
 #pragma once
 
 #include "../CompilationEngine/compileEngine.h"
 #include "../Tokenizer/tokenizer.h"
+#include "../VMWriter/vmWriter.h"
+#include <filesystem>
 #include <fstream>
 
+/**
+ * @brief Validates input paths, owns I/O streams and modules, and invokes
+ *        the `CompilationEngine` to translate Jack source to VM code.
+ */
 class CompilerAnalyzer {
   private:
-    Tokenizer         m_tokenizer;
-    std::ofstream&    m_xmlFile;
-    CompilationEngine m_engine;
+    std::ifstream     m_jackFile;   /**< Open Jack source file stream. */
+    std::ofstream     m_vmFile;     /**< VM output file stream. */
+    Tokenizer         m_tokenizer;  /**< Lexical analyzer over `m_jackFile`. */
+    VmWriter          m_vmWriter;   /**< VM writer bound to `m_vmFile`. */
+    CompilationEngine m_engine;     /**< Core compilation engine. */
     
   public:
-   /*
-    * Okay so this is how it should go so basically we take in a JackFile 
-    * we Intialize the internal m_jackFile; and m_xmlFile; After doing that we 
-    * then Intialize both the tokenizer and Compilation Engine consturctor
-    *
-    * then we let them handle the rest and we control
-    * */
-  CompilerAnalyzer(std::ifstream& jackFile, std::ofstream& xmlFile, const std::string& fileName);
+    /**
+     * @brief Construct a compiler analyzer for the given Jack source file path.
+     * @param filePath Path to a `.jack` source file.
+     */
+    CompilerAnalyzer(const std::filesystem::path& filePath);
     CompilerAnalyzer& operator=(CompilerAnalyzer&) = delete;
     CompilerAnalyzer(CompilerAnalyzer&) = delete;
 
-    // @brief runs the Compiler Loop
+    /** @brief Run the compilation pipeline from Jack source to VM output. */
     void run();
 };

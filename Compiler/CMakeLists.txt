@@ -29,8 +29,6 @@ add_executable(
 # Linking static libs to executable
 target_link_libraries(Compiler PRIVATE
   CompilerAnalyzer
-  SymbolTable
-  VMWriter
 )
 
 # Google Test

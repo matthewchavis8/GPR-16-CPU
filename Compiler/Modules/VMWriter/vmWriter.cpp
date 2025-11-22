@@ -1,4 +1,3 @@
-
 #include "vmWriter.h"
 #include <cstdint>
 #include <fstream>
@@ -35,7 +34,7 @@ void VmWriter::writeGoto(std::string_view label) {
 }
 
 void VmWriter::writeIf(std::string_view label) {
-  m_vmFile << "if " << label << '\n';
+  m_vmFile << "if-goto " << label << '\n';
 }
 
 void VmWriter::writeCall(std::string_view fnName, uint32_t nArgs) {

@@ -111,7 +111,7 @@ class TokenizerTestObject : public ::testing::Test {
       }
       filestream.open(filepath, std::ios::in);
 
-      tokenizer = std::make_unique<Tokenizer>(filestream, filepath.string());
+      tokenizer = std::make_unique<Tokenizer>(filestream);
     }
 
     void TearDown() override {
