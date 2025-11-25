@@ -4,14 +4,15 @@
 
 class GprScreen {
   private:
-    static constexpr uint16_t m_WIDTH        { 512 };
-    static constexpr uint16_t m_HEIGHT       { 256 };
-    static constexpr uint16_t m_SCREEN_BASE { 16384 };
     static inline bool m_s_color { true };
     
     static void setPixelRaw(uint16_t dx, uint16_t dy, bool isOn);
 
   public:
+    static constexpr uint16_t WIDTH        { 512 };
+    static constexpr uint16_t HEIGHT       { 256 };
+    static constexpr uint16_t SCREEN_BASE { 16384 };
+
     static void clearScreen();
     static void setColor(bool black);
     static void drawPixel(uint16_t dx, uint16_t dy);

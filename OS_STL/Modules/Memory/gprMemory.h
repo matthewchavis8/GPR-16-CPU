@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 
-using Word = uint16_t;
+using Word = int16_t;
 
 class GprMemory {
   private:
