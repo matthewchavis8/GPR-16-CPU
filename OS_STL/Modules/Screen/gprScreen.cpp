@@ -17,7 +17,7 @@ void GprScreen::setPixelRaw(uint16_t dx, uint16_t dy, bool isOn) {
   else
    word &= ~mask;
 
-  GprMemory::poke(addr, word)
+  GprMemory::poke(addr, word);
 }
 void GprScreen::clearScreen() {}
 void setColor(bool black);
