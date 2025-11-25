@@ -1,0 +1,17 @@
+/**
+ * @brief OS_STL - Operating System Standard Template Library for GPR-16 CPU
+ * 
+ * Single header that includes all OS_STL modules.
+ * Usage: #include <os_stl>
+ */
+
+#pragma once
+
+// Core modules
+#include "Modules/Math/gprMath.h"
+#include "Modules/Memory/gprMemory.h"
+#include "Modules/String/gprString.h"
+#include "Modules/Screen/gprScreen.h"
+#include "Modules/Keyboard/gprKeyboard.h"
+#include "Modules/Sys/gprSys.h"
+

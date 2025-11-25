@@ -32,30 +32,35 @@ void GprScreen::setColor(bool black) { m_s_color = black; }
 void GprScreen::drawPixel(uint16_t dx, uint16_t dy) { setPixelRaw(dx, dy, m_s_color); }
 
 void GprScreen::drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
-  uint16_t dx = GprMath::abs(x2 - x1);
-  uint16_t dy = GprMath::abs(y2 - y1);
+  int16_t ix1 = static_cast<int16_t>(x1);
+  int16_t iy1 = static_cast<int16_t>(y1);
+  int16_t ix2 = static_cast<int16_t>(x2);
+  int16_t iy2 = static_cast<int16_t>(y2);
+  
+  int16_t dx = GprMath::abs(ix2 - ix1);
+  int16_t dy = -GprMath::abs(iy2 - iy1);
 
-  uint16_t sx = (x1 < x2) ? 1 : -1;
-  uint16_t sy = (y1 < y2) ? 1 : -1;
+  int16_t sx = (ix1 < ix2) ? 1 : -1;
+  int16_t sy = (iy1 < iy2) ? 1 : -1;
 
-  uint16_t err = dx + dy;
+  int16_t err = dx + dy;
 
   while (true) {
-    drawPixel(x1, x2);
+    drawPixel(static_cast<uint16_t>(ix1), static_cast<uint16_t>(iy1));
 
-    if (x1 == x2 && y1 == y2)
+    if (ix1 == ix2 && iy1 == iy2)
       break;
 
-    uint16_t e2 = 2 * err;
+    int16_t e2 = 2 * err;
 
     if (e2 >= dy) {
       err += dy;
-      x1 += sx;
+      ix1 += sx;
     } 
 
     if (e2 <= dx) {
       err += dx;
-      y1 += sy;
+      iy1 += sy;
     }
   }
 

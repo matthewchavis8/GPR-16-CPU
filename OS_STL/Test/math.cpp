@@ -4,9 +4,13 @@
 
 TEST(OS_MATH, Math_Abs) {
   int16_t res { GprMath::abs(10) };
-  int16_t expected { -10 };
+  int16_t expected { 10 };
 
   ASSERT_EQ(res, expected);
+  
+  // Test with negative input
+  int16_t res2 { GprMath::abs(-10) };
+  ASSERT_EQ(res2, 10);
 }
 
 TEST(OS_MATH, Math_Multiply) {

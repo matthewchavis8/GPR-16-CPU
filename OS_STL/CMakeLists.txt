@@ -29,11 +29,16 @@ add_library(OS_STL
 target_link_libraries(OS_STL INTERFACE
   Math
   String
-  Array
   Screen
   Keyboard
   Memory
   Sys
+)
+
+# Make the os_stl header accessible
+target_include_directories(OS_STL INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>
 )
 
 # Google Test
