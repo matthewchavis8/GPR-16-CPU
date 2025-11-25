@@ -16,7 +16,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Adding submodules to link
 add_subdirectory(Modules/Math)
 add_subdirectory(Modules/String)
-add_subdirectory(Modules/Array)
 add_subdirectory(Modules/Screen)
 add_subdirectory(Modules/Keyboard)
 add_subdirectory(Modules/Memory)
@@ -25,6 +24,7 @@ add_subdirectory(Modules/Sys)
 add_library(OS_STL
   INTERFACE
 )
+
 # Linking static libs to executable
 target_link_libraries(OS_STL INTERFACE
   Math

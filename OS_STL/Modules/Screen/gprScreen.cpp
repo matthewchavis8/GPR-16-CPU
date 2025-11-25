@@ -26,6 +26,7 @@ void GprScreen::clearScreen() {
   for (int i{}; i < 8192; ++i)
     GprMemory::poke(SCREEN_BASE + i, 0);
 }
+
 void GprScreen::setColor(bool black) { m_s_color = black; }
 
 void GprScreen::drawPixel(uint16_t dx, uint16_t dy) { setPixelRaw(dx, dy, m_s_color); }
