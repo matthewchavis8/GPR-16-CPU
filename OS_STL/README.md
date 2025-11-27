@@ -15,8 +15,6 @@ A lightweight, efficient standard library designed for the GPR-16 CPU architectu
   - [Keyboard](#keyboard-module)
   - [System](#system-module)
 - [Building](#building)
-- [Testing](#testing)
-- [Examples](#examples)
 
 ## Overview
 
