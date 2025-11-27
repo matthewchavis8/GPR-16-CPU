@@ -151,29 +151,6 @@ Word address = GprMemory::alloc(100);  // Allocates 100 words
 Word* mem_ptr = GprMemory::data();
 ```
 
-#### Example
-
-```cpp
-#include <os_stl>
-
-int main() {
-    GprSys::init();
-    
-    // Allocate buffer for 50 words
-    Word buffer_addr = GprMemory::alloc(50);
-    
-    // Write data
-    for (int i = 0; i < 50; i++) {
-        GprMemory::poke(buffer_addr + i, i * 2);
-    }
-    
-    // Read data
-    Word value = GprMemory::peek(buffer_addr + 10);
-    
-    return 0;
-}
-```
-
 ---
 
 ### String Module
@@ -201,49 +178,6 @@ GprString str3(str2);
 // Move constructor
 GprString str4(std::move(str2));
 ```
-
-#### Methods
-
-```cpp
-// Get length
-size_t len = str.length();
-
-// Get character at index
-osChar ch = str.charAt(0);
-
-// Set character at index
-str.setCharAt(0, u'H');
-
-// Append character
-str.appendChar(u'!');
-
-// Remove last character
-str.eraseLastChar();
-
-// Convert to integer
-uint16_t num = str.intValue();  // Parses "123" -> 123
-
-// Release memory
-str.dispose();
-```
-
-#### Example
-
-```cpp
-#include <os_stl>
-
-GprString name(u"GPR");
-name.appendChar(u'-');
-name.appendChar(u'1');
-name.appendChar(u'6');
-// name now contains "GPR-16"
-
-GprString number(u"42");
-uint16_t value = number.intValue();  // value = 42
-```
-
----
-
 ### Screen Module
 
 **Header:** `Modules/Screen/gprScreen.h`
@@ -286,27 +220,6 @@ GprScreen::drawCircle(256, 128, 50);
 - X-axis: 0-511 (left to right)
 - Y-axis: 0-255 (top to bottom)
 
-#### Example
-
-```cpp
-#include <os_stl>
-
-int main() {
-    GprSys::init();
-    
-    // Clear screen
-    GprScreen::clearScreen();
-    
-    // Draw black shapes
-    GprScreen::setColor(true);
-    GprScreen::drawRectangle(10, 10, 100, 100);
-    GprScreen::drawCircle(256, 128, 75);
-    GprScreen::drawLine(0, 0, 511, 255);
-    
-    return 0;
-}
-```
-
 ---
 
 ### Keyboard Module
@@ -319,44 +232,6 @@ Handles keyboard input through memory-mapped I/O at address 24576.
 
 - `128` - Newline/Enter
 - `129` - Backspace
-
-#### Functions
-
-```cpp
-// Check current key (non-blocking, returns 0 if no key)
-Word key = GprKeyboard::keyPressed();
-
-// Wait for and read single character (blocking)
-osChar ch = GprKeyboard::readChar();
-
-// Read line of text (blocking, max 256 chars)
-GprString line = GprKeyboard::readLine(u"Enter text: ");
-
-// Read integer (blocking)
-Word num = GprKeyboard::readInt(u"Enter number: ");
-```
-
-#### Example
-
-```cpp
-#include <os_stl>
-
-int main() {
-    GprSys::init();
-    
-    // Non-blocking check
-    Word key = GprKeyboard::keyPressed();
-    if (key != 0) {
-        // Key is pressed
-    }
-    
-    // Read user input
-    GprString name = GprKeyboard::readLine(u"Name: ");
-    Word age = GprKeyboard::readInt(u"Age: ");
-    
-    return 0;
-}
-```
 
 ---
 
@@ -418,130 +293,18 @@ mkdir build && cd build
 # Configure
 cmake ..
 
-# Build
-cmake --build .
+# Debug & Release builds
+cmake preset=Debug
+cmake preset=Release
+
+cd {Debug/Release}
+make
 
 # Run tests
 ctest --output-on-failure
 ```
 
-### Build Targets
-
-```bash
-# Build everything
-make all
-
-# Build specific module tests
-make unit_math
-make unit_memory
-make unit_string
-make unit_screen
-make unit_keyboard
-make unit_sys
-```
-
-## Testing
-
-All modules include comprehensive unit tests using GoogleTest.
-
-### Running Tests
-
-```bash
-cd build
-
-# Run all tests
-ctest
-
-# Run specific test suite
-./Test/unit_math
-./Test/unit_memory
-./Test/unit_string
-```
-
-### Test Coverage
-
-- ✅ Math: All operations (abs, multiply, divide, min, max, sqrt)
-- ✅ Memory: Init, peek/poke, allocation, data access
-- ✅ String: Constructors, operations, conversions
-- ✅ Screen: Drawing primitives, color, bounds checking
-- ✅ Keyboard: Key detection, special codes
-- ✅ System: Initialization, timing
-
-## Examples
-
-### Complete Graphics Program
-
-```cpp
-#include <os_stl>
-
-int main() {
-    GprSys::init();
-    GprScreen::clearScreen();
-    GprScreen::setColor(true);
-    
-    // Draw grid
-    for (int x = 0; x < 512; x += 50) {
-        GprScreen::drawLine(x, 0, x, 255);
-    }
-    for (int y = 0; y < 256; y += 50) {
-        GprScreen::drawLine(0, y, 511, y);
-    }
-    
-    // Draw circles in corners
-    GprScreen::drawCircle(50, 50, 30);
-    GprScreen::drawCircle(462, 50, 30);
-    GprScreen::drawCircle(50, 206, 30);
-    GprScreen::drawCircle(462, 206, 30);
-    
-    GprSys::halt();
-    return 0;
-}
-```
-
-### Interactive Input Program
-
-```cpp
-#include <os_stl>
-
-int main() {
-    GprSys::init();
-    
-    GprString name = GprKeyboard::readLine(u"Enter your name: ");
-    Word age = GprKeyboard::readInt(u"Enter your age: ");
-    
-    // Process input...
-    
-    return 0;
-}
-```
-
-### Memory and String Management
-
-```cpp
-#include <os_stl>
-
-int main() {
-    GprSys::init();
-    
-    // Allocate array
-    Word array_base = GprMemory::alloc(100);
-    
-    // Fill array
-    for (int i = 0; i < 100; i++) {
-        GprMemory::poke(array_base + i, i * i);
-    }
-    
-    // String operations
-    GprString message(u"Value: ");
-    GprString num(u"42");
-    
-    uint16_t value = num.intValue();
-    
-    return 0;
-}
-```
-
-## Architecture Notes
+## Notes
 
 ### Word Type
 
@@ -554,26 +317,6 @@ Throughout the library, `Word` is defined as `int16_t` (16-bit signed integer):
 The GPR-16 uses memory-mapped I/O:
 - **Screen:** 16384-24575 (8192 words = 512×256 bits)
 - **Keyboard:** 24576 (single word register)
-
-### Design Principles
-
-1. **Static Classes:** All functionality through static methods (no instances)
-2. **constexpr:** Math functions are compile-time evaluable
-3. **No Exceptions:** Designed for embedded/bare-metal systems
-4. **Minimal Dependencies:** Only standard C++ library headers
-
-## License
-
-This project is part of the GPR-16 CPU ecosystem.
-
-## Contributing
-
-When contributing, ensure:
-- All new functions have Doxygen comments
-- Unit tests are provided for new functionality
-- Code follows the existing style
-- No external dependencies are introduced
-
 ---
 
 **Version:** 1.0  
