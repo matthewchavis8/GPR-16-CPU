@@ -12,9 +12,7 @@ The VM translator follows a classic two-stage translation pipeline:
 - **Code Generation**: `CodeWriter` emits GPR-16 assembly instructions corresponding to each VM command.
 - **Orchestration**: `VMTranslator` coordinates file I/O, wires the parser and code writer, and handles both single-file and directory translation.
 
-At a high level:
-
-Note: add image here VM translator flow
+<img width="496" height="860" alt="VmTranslatorFlowChart" src="https://github.com/user-attachments/assets/a7e0ff8b-88a3-4fb1-82ec-4333a8d3b847" />
 
 ---
 
