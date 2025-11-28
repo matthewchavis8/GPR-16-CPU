@@ -96,34 +96,6 @@ Demonstration programs showcasing the system's capabilities:
 
 These programs can be loaded directly into the Hardware Simulator to run on the CPU.
 
-## End-to-End Flow: From Source to Pixels
-
-The complete path from high-level code to hardware execution:
-
-```mermaid
-flowchart LR
-    subgraph Toolchain
-        A[High-Level Source<br/>Jack Code] --> B[Compiler]
-        B --> C[VM Code<br/>Stack-Based IR]
-        C --> D[VM-Translator]
-        D --> E[Assembly<br/>GPR-16 ASM]
-        E --> F[Assembler]
-        F --> G[Machine Code<br/>.hack ROM]
-    end
-
-    subgraph Hardware
-        G --> H[CPU<br/>Fetch-Decode-Execute]
-        H <--> I[Memory<br/>RAM + I/O Map]
-        I --> J[Screen<br/>0x4000-0x5FFF]
-        I --> K[Keyboard<br/>0x6000]
-    end
-
-    style A fill:#e1f5ff
-    style G fill:#ffe1e1
-    style J fill:#e1ffe1
-    style K fill:#fff4e1
-```
-
 **Step-by-step execution:**
 
 1. **Compiler** parses Jack source code, performs semantic analysis, and generates VM instructions
