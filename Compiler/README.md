@@ -15,8 +15,8 @@ The compiler follows the classic front‑end pipeline:
 - **Symbol management**: `SymbolTable` tracks identifiers (type, kind, index) across class and subroutine scopes.
 - **Orchestration**: `CompilerAnalyzer` owns the file streams and modules, validating inputs and invoking the pipeline.
 
-At a high level:
-Note: add image here compiler flow
+<img width="835" height="1240" alt="CompilerFlowChart" src="https://github.com/user-attachments/assets/90c34e63-62e1-486f-81c2-44360f363212" />
+
 ---
 
 ### Key Components
