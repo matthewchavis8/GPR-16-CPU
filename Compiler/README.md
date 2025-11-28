@@ -16,20 +16,7 @@ The compiler follows the classic front‑end pipeline:
 - **Orchestration**: `CompilerAnalyzer` owns the file streams and modules, validating inputs and invoking the pipeline.
 
 At a high level:
-
-```text
-Jack source (.jack)
-        │
-        ▼
-   Tokenizer  ──► tokens
-        │
-        ▼
-CompilationEngine + SymbolTable
-        │
-        ▼
-     VmWriter  ──► VM code (.vm)
-```
-
+Note: add image here compiler flow
 ---
 
 ### Key Components
